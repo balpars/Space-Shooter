@@ -12,6 +12,7 @@ namespace Space_Shooter
         private InputHandler inputHandler;
         private Player player;
         private List<Enemy> enemies;
+        private List<Background> backgrounds;
         private Random random;
         private int spawnInterval;
         private int spawnTimer;
@@ -24,6 +25,7 @@ namespace Space_Shooter
             inputHandler = new InputHandler();
             player = new Player(100, 100, 50, 50);
             enemies = new List<Enemy>();
+            backgrounds = new List<Background>();
             random = new Random();
             spawnInterval = 1000; // Spawn every 1000ms
             spawnTimer = 0;
@@ -47,6 +49,12 @@ namespace Space_Shooter
             }
 
             renderer.Init(window);
+
+            // Correct place to initialize backgrounds
+            backgrounds.Add(new Background("Assets/Background/background_1.png", renderer.RendererHandle, 1));
+            backgrounds.Add(new Background("Assets/Background/background_2.png", renderer.RendererHandle, 2));
+            backgrounds.Add(new Background("Assets/Background/background_3.png", renderer.RendererHandle, 3));
+            backgrounds.Add(new Background("Assets/Background/background_4.png", renderer.RendererHandle, 4));
         }
 
         public void Run()
@@ -74,6 +82,10 @@ namespace Space_Shooter
             {
                 enemy.Update();
             }
+            foreach (var bg in backgrounds)
+            {
+                bg.Update();
+            }
             SpawnEnemies();
             RemoveOffScreenEnemies();
         }
@@ -81,6 +93,10 @@ namespace Space_Shooter
         private void Render()
         {
             renderer.Clear();
+            foreach (var bg in backgrounds)
+            {
+                renderer.DrawBackground(bg);
+            }
             renderer.Draw(player);
             foreach (var enemy in enemies)
             {
@@ -91,6 +107,10 @@ namespace Space_Shooter
 
         private void Cleanup()
         {
+            foreach (var bg in backgrounds)
+            {
+                bg.Cleanup();
+            }
             renderer.Cleanup();
             SDL.SDL_DestroyWindow(window);
             SDL.SDL_Quit();

@@ -7,6 +7,11 @@ namespace Space_Shooter
     {
         private IntPtr renderer;
 
+        public IntPtr RendererHandle
+        {
+            get { return renderer; }
+        }
+
         public void Init(IntPtr window)
         {
             renderer = SDL.SDL_CreateRenderer(window, -1, SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED);
@@ -20,8 +25,13 @@ namespace Space_Shooter
 
         public void Clear()
         {
-            SDL.SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+            SDL.SDL_SetRenderDrawColor(renderer, 0, 0, 139, 255);
             SDL.SDL_RenderClear(renderer);
+        }
+
+        public void DrawBackground(Background bg)
+        {
+            bg.Render(renderer);
         }
 
         public void Draw(GameObject obj)
