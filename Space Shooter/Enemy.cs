@@ -1,8 +1,15 @@
-﻿namespace Space_Shooter
+﻿using SDL2;
+
+namespace Space_Shooter
 {
     class Enemy : GameObject
     {
-        public Enemy(int x, int y, int w, int h) : base(x, y, w, h) { }
+        protected string? assetPath; // Path to the texture asset for the enemy
+
+        public Enemy(int x, int y, int w, int h) : base(x, y, w, h)
+        {
+        }
+
 
         public override void Update()
         {
@@ -10,9 +17,10 @@
             Move(0, 2);
         }
 
-        public override void HandleInput(byte[] keys)
+        public override string? GetAssetPath()
         {
-            // Enemies don't handle player input
+            return assetPath;
         }
+
     }
 }

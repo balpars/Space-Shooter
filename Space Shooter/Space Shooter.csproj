@@ -25,6 +25,9 @@
     <None Update="Assets\Background\background_4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Assets\Enemy\enemy.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="libfreetype-6.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -23,6 +23,6 @@ namespace Space_Shooter
         }
 
         public abstract void Update();
-        public abstract void HandleInput(byte[] keys);
+        public abstract string? GetAssetPath();
     }
 }

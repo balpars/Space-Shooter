@@ -11,7 +11,7 @@ namespace Space_Shooter
             // Update player state here
         }
 
-        public override void HandleInput(byte[] keys)
+        public void HandleInput(byte[] keys)
         {
             if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_UP] == 1)
             {
@@ -29,6 +29,12 @@ namespace Space_Shooter
             {
                 Move(5, 0);
             }
+        }
+
+        public override string? GetAssetPath()
+        {
+            //throw new NotImplementedException();
+            return "";
         }
     }
 }

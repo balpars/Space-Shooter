@@ -123,7 +123,7 @@ namespace Space_Shooter
             {
                 spawnTimer = 0;
                 int x = random.Next(0, 800 - 50); // Assuming enemy width is 50 and screen width is 800
-                enemies.Add(new Enemy(x, -50, 50, 50)); // Spawn above the screen
+                enemies.Add(new BasicEnemy(x, -50, 50, 50)); // Spawn above the screen
             }
         }
 
