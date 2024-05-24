@@ -1,6 +1,6 @@
-﻿using SDL2;
-using System;
-using System.Numerics;
+﻿using System;
+using System.Collections.Generic;
+using SDL2;
 
 namespace Space_Shooter
 {
@@ -11,6 +11,10 @@ namespace Space_Shooter
         private Renderer renderer;
         private InputHandler inputHandler;
         private Player player;
+        private List<Enemy> enemies;
+        private Random random;
+        private int spawnInterval;
+        private int spawnTimer;
 
         public Game()
         {
@@ -19,6 +23,10 @@ namespace Space_Shooter
             renderer = new Renderer();
             inputHandler = new InputHandler();
             player = new Player(100, 100, 50, 50);
+            enemies = new List<Enemy>();
+            random = new Random();
+            spawnInterval = 1000; // Spawn every 1000ms
+            spawnTimer = 0;
         }
 
         public void Init(string title, int width, int height)
@@ -61,14 +69,23 @@ namespace Space_Shooter
 
         private void Update()
         {
-            // Update game objects here
             player.Update();
+            foreach (var enemy in enemies)
+            {
+                enemy.Update();
+            }
+            SpawnEnemies();
+            RemoveOffScreenEnemies();
         }
 
         private void Render()
         {
             renderer.Clear();
             renderer.Draw(player);
+            foreach (var enemy in enemies)
+            {
+                renderer.Draw(enemy);
+            }
             renderer.Present();
         }
 
@@ -77,6 +94,22 @@ namespace Space_Shooter
             renderer.Cleanup();
             SDL.SDL_DestroyWindow(window);
             SDL.SDL_Quit();
+        }
+
+        private void SpawnEnemies()
+        {
+            spawnTimer += 16; // Increment timer by ~16ms for each frame
+            if (spawnTimer >= spawnInterval)
+            {
+                spawnTimer = 0;
+                int x = random.Next(0, 800 - 50); // Assuming enemy width is 50 and screen width is 800
+                enemies.Add(new Enemy(x, -50, 50, 50)); // Spawn above the screen
+            }
+        }
+
+        private void RemoveOffScreenEnemies()
+        {
+            enemies.RemoveAll(enemy => enemy.GetRect().y > 600); // Assuming screen height is 600
         }
     }
 }
