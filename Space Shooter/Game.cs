@@ -11,11 +11,8 @@ namespace Space_Shooter
         private Renderer renderer;
         private InputHandler inputHandler;
         private Player player;
-        private List<Enemy> enemies;
+        private SpawnEnemy spawnEnemy;
         private List<Background> backgrounds;
-        private Random random;
-        private int spawnInterval;
-        private int spawnTimer;
         public int windowWidth, windowHeight;
 
         public Game()
@@ -24,11 +21,7 @@ namespace Space_Shooter
             window = IntPtr.Zero;
             renderer = new Renderer();
             inputHandler = new InputHandler();
-            enemies = new List<Enemy>();
             backgrounds = new List<Background>();
-            random = new Random();
-            spawnInterval = 1000; // Spawn every 1000ms
-            spawnTimer = 0;
         }
 
         public void Init(string title, int width, int height)
@@ -52,6 +45,7 @@ namespace Space_Shooter
 
             SDL.SDL_GetWindowSize(window, out windowWidth, out windowHeight);
             player = new Player(renderer.RendererHandle, windowWidth, windowHeight);
+            spawnEnemy = new SpawnEnemy(renderer.RendererHandle, windowWidth, windowHeight);
 
             // Initialize backgrounds
             backgrounds.Add(new Background("Assets/Background/background_1.png", renderer.RendererHandle, 1));
@@ -81,16 +75,11 @@ namespace Space_Shooter
         private void Update()
         {
             player.Update();
-            foreach (var enemy in enemies)
-            {
-                enemy.Update();
-            }
+            spawnEnemy.Update();
             foreach (var bg in backgrounds)
             {
                 bg.Update();
             }
-            SpawnEnemies();
-            RemoveOffScreenEnemies();
         }
 
         private void Render()
@@ -101,10 +90,7 @@ namespace Space_Shooter
                 renderer.DrawBackground(bg);
             }
             renderer.Draw(player);
-            foreach (var enemy in enemies)
-            {
-                renderer.Draw(enemy);
-            }
+            spawnEnemy.Render(renderer);
             renderer.Present();
         }
 
@@ -117,22 +103,6 @@ namespace Space_Shooter
             renderer.Cleanup();
             SDL.SDL_DestroyWindow(window);
             SDL.SDL_Quit();
-        }
-
-        private void SpawnEnemies()
-        {
-            spawnTimer += 16; // Increment timer by ~16ms for each frame
-            if (spawnTimer >= spawnInterval)
-            {
-                spawnTimer = 0;
-                int x = random.Next(0, windowWidth - 50); // Assuming enemy width is 50
-                enemies.Add(new BasicEnemy(x, -50, 50, 50)); // Spawn above the screen
-            }
-        }
-
-        private void RemoveOffScreenEnemies()
-        {
-            enemies.RemoveAll(enemy => enemy.GetRect().y > windowHeight);
         }
     }
 }

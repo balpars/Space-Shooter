@@ -3,7 +3,7 @@ using System;
 
 namespace Space_Shooter
 {
-    class Renderer
+    public class Renderer
     {
         private IntPtr renderer;
 
@@ -48,6 +48,15 @@ namespace Space_Shooter
                 IntPtr texture = TextureManager.LoadTexture(player.GetAssetPath(), renderer);
                 SDL.SDL_Rect srcRect = new SDL.SDL_Rect { x = 0, y = 0, w = 100, h = 100 };
                 SDL.SDL_Rect destRect = new SDL.SDL_Rect { x = player.PositionX, y = player.PositionY, w = 100, h = 100 };
+                // TO-DO Make w and h size of asset instead of hardcoding
+
+                SDL.SDL_RenderCopy(renderer, texture, ref srcRect, ref destRect);
+            }
+            else if (obj is Projectile projectile && projectile.GetAssetPath() != null)
+            {
+                IntPtr texture = TextureManager.LoadTexture(projectile.GetAssetPath(), renderer);
+                SDL.SDL_Rect srcRect = new SDL.SDL_Rect { x = 0, y = 0, w = 100, h = 100 };
+                SDL.SDL_Rect destRect = obj.GetRect();
                 // TO-DO Make w and h size of asset instead of hardcoding
 
                 SDL.SDL_RenderCopy(renderer, texture, ref srcRect, ref destRect);

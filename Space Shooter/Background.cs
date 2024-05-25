@@ -1,8 +1,9 @@
 ﻿using SDL2;
+using System;
 
 namespace Space_Shooter
 {
-    class Background
+    public class Background
     {
         private SDL.SDL_Rect rect;
         private IntPtr texture;

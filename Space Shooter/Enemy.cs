@@ -2,19 +2,18 @@
 
 namespace Space_Shooter
 {
-    class Enemy : GameObject
+    public class Enemy : GameObject
     {
         protected string? assetPath; // Path to the texture asset for the enemy
+        public int Speed { get; private set; } = 3;
 
-        public Enemy(int x, int y, int w, int h) : base(x, y, w, h)
+        public Enemy(int x, int y, int size) : base(x, y, size, size)
         {
         }
 
-
         public override void Update()
         {
-            // Example enemy movement: move downwards
-            Move(0, 2);
+            Move(0, Speed);
         }
 
         public string? GetAssetPath()
