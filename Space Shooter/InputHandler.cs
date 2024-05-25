@@ -15,6 +15,14 @@ namespace Space_Shooter
                 {
                     return false;
                 }
+                else if (e.type == SDL.SDL_EventType.SDL_KEYDOWN)
+                {
+                    // Check if the ESC key was pressed
+                    if (e.key.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE)
+                    {
+                        return false; // Quit the game
+                    }
+                }
             }
 
             int numKeys;

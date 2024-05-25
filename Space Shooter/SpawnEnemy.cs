@@ -19,7 +19,7 @@ namespace Space_Shooter
         private int shootInterval = 400;
         private uint lastShootTime;
 
-        private List<Enemy> spawnObjects;
+        private List<Enemy> enemies;
         private uint lastSpawnTime;
         private int spawnInterval = 2000;
 
@@ -30,27 +30,27 @@ namespace Space_Shooter
             this.screenHeight = screenHeight;
             random = new Random();
             projectiles = new List<Projectile>();
-            spawnObjects = new List<Enemy>();
-            createSpawnObject();
+            enemies = new List<Enemy>();
+            createenemy();
             lastShootTime = SDL.SDL_GetTicks();
             lastSpawnTime = SDL.SDL_GetTicks();
         }
 
-        public void Update()
+        public void Update(Player player)
         {
             uint currentTime = SDL.SDL_GetTicks();
 
             // Update falling objects
-            for (int i = spawnObjects.Count - 1; i >= 0; i--)
+            for (int i = enemies.Count - 1; i >= 0; i--)
             {
-                spawnObjects[i].Update();
-                if (spawnObjects[i].GetRect().y > screenHeight)
+                enemies[i].Update();
+                if (enemies[i].GetRect().y > screenHeight)
                 {
-                    spawnObjects.RemoveAt(i);
+                    enemies.RemoveAt(i);
                 }
                 else
                 {
-                    Console.WriteLine($"SpawnObject at ({spawnObjects[i].GetRect().x}, {spawnObjects[i].GetRect().y})");
+                    Console.WriteLine($"enemy at ({enemies[i].GetRect().x}, {enemies[i].GetRect().y})");
                 }
             }
 
@@ -69,7 +69,7 @@ namespace Space_Shooter
             }
 
             // Check for collisions
-            CollisionManager.CheckCollisions(projectiles, spawnObjects);
+            CollisionManager.CheckCollisions(projectiles, enemies, player);
 
             // Handle shooting
             if (currentTime > lastShootTime + shootInterval)
@@ -81,16 +81,16 @@ namespace Space_Shooter
             // Handle spawning new objects
             if (currentTime > lastSpawnTime + spawnInterval)
             {
-                createSpawnObject();
+                createenemy();
                 lastSpawnTime = currentTime;
             }
         }
 
         public void Render(Renderer renderer)
         {
-            foreach (var spawnObject in spawnObjects)
+            foreach (var enemy in enemies)
             {
-                renderer.Draw(spawnObject);
+                renderer.Draw(enemy);
             }
 
             foreach (var projectile in projectiles)
@@ -99,19 +99,19 @@ namespace Space_Shooter
             }
         }
 
-        private void createSpawnObject()
+        private void createenemy()
         {
             int objectX = random.Next(0, screenWidth - objectSize);
             int objectY = -objectSize;
-            spawnObjects.Add(new BasicEnemy(objectX, -50, objectSize)); Console.WriteLine($"SpawnObject from ({objectX}, {objectY})");
+            enemies.Add(new BasicEnemy(objectX, -50, objectSize)); Console.WriteLine($"enemy from ({objectX}, {objectY})");
         }
 
         private void Shoot()
         {
-            foreach (var spawnObject in spawnObjects)
+            foreach (var enemy in enemies)
             {
-                int projectileX = spawnObject.GetRect().x + objectSize / 2 - 10;
-                int projectileY = spawnObject.GetRect().y + objectSize - 5;
+                int projectileX = enemy.GetRect().x + objectSize / 2 - 10;
+                int projectileY = enemy.GetRect().y + objectSize - 5;
                 projectiles.Add(new BasicProjectile(projectileX, projectileY, projectileSize)); 
                 Console.WriteLine($"Projectile from ({projectileX}, {projectileY})");
             }

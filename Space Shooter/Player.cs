@@ -2,7 +2,7 @@
 
 namespace Space_Shooter
 {
-    class Player : GameObject
+    public class Player : GameObject
     {
         protected string assetPath;
         public int PositionX { get; private set; }

@@ -49,8 +49,8 @@ namespace Space_Shooter
 
             // Initialize backgrounds
             backgrounds.Add(new Background("Assets/Background/background_1.png", renderer.RendererHandle, 1));
-            backgrounds.Add(new Background("Assets/Background/background_2.png", renderer.RendererHandle, 2));
-            backgrounds.Add(new Background("Assets/Background/background_3.png", renderer.RendererHandle, 3));
+            //backgrounds.Add(new Background("Assets/Background/background_2.png", renderer.RendererHandle, 2));
+            //backgrounds.Add(new Background("Assets/Background/background_3.png", renderer.RendererHandle, 3));
             backgrounds.Add(new Background("Assets/Background/background_4.png", renderer.RendererHandle, 4));
         }
 
@@ -75,7 +75,7 @@ namespace Space_Shooter
         private void Update()
         {
             player.Update();
-            spawnEnemy.Update();
+            spawnEnemy.Update(player);
             foreach (var bg in backgrounds)
             {
                 bg.Update();
