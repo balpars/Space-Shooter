@@ -31,6 +31,9 @@
     <None Update="Assets\Player\player.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Assets\Projectiles\projectile.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="libfreetype-6.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

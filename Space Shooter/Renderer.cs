@@ -39,7 +39,7 @@ namespace Space_Shooter
             if (obj is Enemy enemy && enemy.GetAssetPath() != null)
             {
                 IntPtr texture = TextureManager.LoadTexture(enemy.GetAssetPath(), renderer);
-                SDL.SDL_Rect srcRect = new SDL.SDL_Rect { x = 0, y = 0, w = obj.GetRect().w, h = obj.GetRect().h };
+                SDL.SDL_Rect srcRect = new SDL.SDL_Rect { x = 0, y = 0, w = 68, h = 54 };
                 SDL.SDL_Rect destRect = obj.GetRect();
                 SDL.SDL_RenderCopy(renderer, texture, ref srcRect, ref destRect);
             }

@@ -110,8 +110,8 @@ namespace Space_Shooter
         {
             foreach (var enemy in enemies)
             {
-                int projectileX = enemy.GetRect().x + objectSize / 2 - 10;
-                int projectileY = enemy.GetRect().y + objectSize - 5;
+                int projectileX = enemy.GetRect().x + objectSize / 2 -23;
+                int projectileY = enemy.GetRect().y + objectSize -5;
                 projectiles.Add(new BasicProjectile(projectileX, projectileY, projectileSize)); 
                 Console.WriteLine($"Projectile from ({projectileX}, {projectileY})");
             }
