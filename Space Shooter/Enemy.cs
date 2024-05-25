@@ -17,7 +17,7 @@ namespace Space_Shooter
             Move(0, 2);
         }
 
-        public override string? GetAssetPath()
+        public string? GetAssetPath()
         {
             return assetPath;
         }

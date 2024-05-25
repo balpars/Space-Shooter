@@ -16,6 +16,7 @@ namespace Space_Shooter
         private Random random;
         private int spawnInterval;
         private int spawnTimer;
+        public int windowWidth, windowHeight;
 
         public Game()
         {
@@ -23,7 +24,6 @@ namespace Space_Shooter
             window = IntPtr.Zero;
             renderer = new Renderer();
             inputHandler = new InputHandler();
-            player = new Player(100, 100, 50, 50);
             enemies = new List<Enemy>();
             backgrounds = new List<Background>();
             random = new Random();
@@ -50,7 +50,10 @@ namespace Space_Shooter
 
             renderer.Init(window);
 
-            // Correct place to initialize backgrounds
+            SDL.SDL_GetWindowSize(window, out windowWidth, out windowHeight);
+            player = new Player(renderer.RendererHandle, windowWidth, windowHeight);
+
+            // Initialize backgrounds
             backgrounds.Add(new Background("Assets/Background/background_1.png", renderer.RendererHandle, 1));
             backgrounds.Add(new Background("Assets/Background/background_2.png", renderer.RendererHandle, 2));
             backgrounds.Add(new Background("Assets/Background/background_3.png", renderer.RendererHandle, 3));
@@ -122,14 +125,14 @@ namespace Space_Shooter
             if (spawnTimer >= spawnInterval)
             {
                 spawnTimer = 0;
-                int x = random.Next(0, 800 - 50); // Assuming enemy width is 50 and screen width is 800
+                int x = random.Next(0, windowWidth - 50); // Assuming enemy width is 50
                 enemies.Add(new BasicEnemy(x, -50, 50, 50)); // Spawn above the screen
             }
         }
 
         private void RemoveOffScreenEnemies()
         {
-            enemies.RemoveAll(enemy => enemy.GetRect().y > 600); // Assuming screen height is 600
+            enemies.RemoveAll(enemy => enemy.GetRect().y > windowHeight);
         }
     }
 }

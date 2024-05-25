@@ -4,12 +4,15 @@ namespace Space_Shooter
 {
     abstract class GameObject
     {
+
         private SDL.SDL_Rect rect;
 
-        public GameObject(int x, int y, int w, int h)
+        public GameObject(int x, int y, int width, int height)
         {
-            rect = new SDL.SDL_Rect { x = x, y = y, w = w, h = h };
+            rect = new SDL.SDL_Rect { x = x, y = y, w = width, h = height };
         }
+
+
 
         public void Move(int deltaX, int deltaY)
         {
@@ -23,6 +26,6 @@ namespace Space_Shooter
         }
 
         public abstract void Update();
-        public abstract string? GetAssetPath();
+
     }
 }
