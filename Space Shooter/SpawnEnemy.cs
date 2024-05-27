@@ -113,7 +113,7 @@ namespace Space_Shooter
             {
                 int projectileX = enemy.GetRect().x + objectSize / 2 -23;
                 int projectileY = enemy.GetRect().y + objectSize -5;
-                projectiles.Add(new BasicProjectile(projectileX, projectileY, projectileSize)); 
+                projectiles.Add(new BasicProjectile(projectileX, projectileY, projectileSize,false)); 
                 // Console.WriteLine($"Projectile from ({projectileX}, {projectileY})");
             }
         }

@@ -1,6 +1,4 @@
 ﻿using SDL2;
-using System;
-using System.Numerics;
 
 namespace Space_Shooter
 {

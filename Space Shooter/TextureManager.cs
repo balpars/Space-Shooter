@@ -4,43 +4,32 @@ using System.Collections.Generic;
 
 namespace Space_Shooter
 {
-    static class TextureManager
+    public class TextureManager
     {
-        private static Dictionary<string, IntPtr> textures = new Dictionary<string, IntPtr>();
+        private static Dictionary<string, IntPtr> textureMap = new Dictionary<string, IntPtr>();
 
-        public static IntPtr LoadTexture(string path, IntPtr renderer)
+        public static IntPtr LoadTexture(string fileName, IntPtr renderer)
         {
-            if (textures.TryGetValue(path, out IntPtr existingTexture))
+            if (!textureMap.ContainsKey(fileName))
             {
-                return existingTexture;  // Return already loaded texture
+                IntPtr texture = SDL_image.IMG_LoadTexture(renderer, fileName);
+                if (texture == IntPtr.Zero)
+                {
+                    Console.WriteLine($"Failed to load texture {fileName}: {SDL.SDL_GetError()}");
+                    return IntPtr.Zero;
+                }
+                textureMap[fileName] = texture;
             }
-
-            IntPtr loadedSurface = SDL_image.IMG_Load(path);
-            if (loadedSurface == IntPtr.Zero)
-            {
-                Console.WriteLine($"Unable to load texture {path}! SDL_Error: {SDL.SDL_GetError()}");
-                return IntPtr.Zero;
-            }
-
-            IntPtr texture = SDL.SDL_CreateTextureFromSurface(renderer, loadedSurface);
-            if (texture == IntPtr.Zero)
-            {
-                Console.WriteLine($"Unable to create texture from {path}. SDL Error: {SDL.SDL_GetError()}");
-            }
-
-            SDL.SDL_FreeSurface(loadedSurface);
-
-            textures[path] = texture;  // Store texture for future use
-            return texture;
+            return textureMap[fileName];
         }
 
-        public static void Cleanup()
+        public static void Clear()
         {
-            foreach (var texture in textures.Values)
+            foreach (var texture in textureMap.Values)
             {
                 SDL.SDL_DestroyTexture(texture);
             }
-            textures.Clear();
+            textureMap.Clear();
         }
     }
 }

@@ -90,6 +90,7 @@ namespace Space_Shooter
                 renderer.DrawBackground(bg);
             }
             renderer.Draw(player);
+            player.RenderProjectiles(renderer);
             spawnEnemy.Render(renderer);
             renderer.Present();
         }
