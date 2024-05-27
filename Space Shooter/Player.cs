@@ -8,6 +8,8 @@ namespace Space_Shooter
         protected string assetPath;
         public int PositionX { get; private set; }
         public int PositionY { get; private set; }
+        private int screenWidth;
+        private int screenHeight;
         private List<Projectile> projectiles;
         private List<Enemy> enemies;
         private uint lastShootTime;
@@ -18,6 +20,8 @@ namespace Space_Shooter
             assetPath = "Assets/Player/player.png";
             this.PositionX = (w - 100) / 2;
             this.PositionY = (h - 100) / 2;
+            this.screenWidth = w;
+            this.screenHeight = h;
             this.enemies = enemies;
             projectiles = new List<Projectile>();
             lastShootTime = SDL.SDL_GetTicks();
@@ -25,37 +29,46 @@ namespace Space_Shooter
 
         public override void Update()
         {
-            // Update player state here
             UpdateProjectiles();
             CollisionManager.CheckCollisions(projectiles, enemies, this);
         }
 
         public void HandleInput(byte[] keys)
         {
+            int newX = PositionX;
+            int newY = PositionY;
+
             if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_UP] == 1)
             {
-                PositionY -= 5;
-                Move(0, -5);
+                newY -= 5;
             }
             if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_DOWN] == 1)
             {
-                PositionY += 5;
-                Move(0, 5);
+                newY += 5;
             }
             if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_LEFT] == 1)
             {
-                PositionX -= 5;
-                Move(-5, 0);
+                newX -= 5;
             }
             if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_RIGHT] == 1)
             {
-                PositionX += 5;
-                Move(5, 0);
+                newX += 5;
             }
             if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_SPACE] == 1)
             {
                 Shoot();
             }
+
+            // Ekran sınırları içinde kalmayı sağla
+            if (newX < 0) newX = 0;
+            if (newX + rect.w > screenWidth) newX = screenWidth - rect.w;
+            if (newY < 0) newY = 0;
+            if (newY + rect.h > screenHeight) newY = screenHeight - rect.h;
+
+            Move(newX - PositionX, newY - PositionY);
+
+            PositionX = newX;
+            PositionY = newY;
         }
 
         private void Shoot()
@@ -65,7 +78,7 @@ namespace Space_Shooter
             {
                 int projectileX = PositionX + rect.w / 2 - 5; // Adjust the x position to center the projectile
                 int projectileY = PositionY; // Projectile starts at the top of the player
-                projectiles.Add(new BasicProjectile(projectileX, projectileY, 20,true)); // Add projectile to the list
+                projectiles.Add(new BasicProjectile(projectileX, projectileY, 20, true, this)); // Add projectile to the list
                 lastShootTime = currentTime;
             }
         }

@@ -6,10 +6,12 @@ namespace Space_Shooter
     {
         protected string? assetPath;
         public int Speed { get; private set; } = 5;
+        public GameObject Owner { get; private set; }
 
-        public Projectile(int x, int y, int size, bool isUpwards) : base(x, y, size, size)
+        public Projectile(int x, int y, int size, bool isUpwards, GameObject owner) : base(x, y, size, size)
         {
             if (isUpwards) { Speed *= -1; }
+            this.Owner = owner;
         }
 
         public override void Update()
@@ -30,7 +32,8 @@ namespace Space_Shooter
 
     public class BasicProjectile : Projectile
     {
-        public BasicProjectile(int x, int y, int size, bool isUpwards) : base(x, y,size,isUpwards)
+        public BasicProjectile(int x, int y, int size, bool isUpwards, GameObject owner)
+            : base(x, y, size, isUpwards, owner)
         {
             assetPath = "Assets/Projectiles/projectile.png"; // Path to your projectile image
         }

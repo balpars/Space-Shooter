@@ -11,12 +11,12 @@ namespace Space_Shooter
         private Renderer renderer;
         private InputHandler inputHandler;
         private Player player;
-        private SpawnEnemy spawnEnemy;
+        private EnemyManager enemyManager;
         private List<Enemy> enemyList;
         private List<Background> backgrounds;
+        private TitleScreen titleScreen;
         public int windowWidth, windowHeight;
-        
-
+        private GameState gameState;
 
         public Game()
         {
@@ -25,6 +25,7 @@ namespace Space_Shooter
             renderer = new Renderer();
             inputHandler = new InputHandler();
             backgrounds = new List<Background>();
+            gameState = GameState.TitleScreen;
         }
 
         public void Init(string title, int width, int height)
@@ -49,13 +50,12 @@ namespace Space_Shooter
             SDL.SDL_GetWindowSize(window, out windowWidth, out windowHeight);
             enemyList = new List<Enemy>();
             player = new Player(renderer.RendererHandle, windowWidth, windowHeight, enemyList);
-            spawnEnemy = new SpawnEnemy(renderer.RendererHandle, windowWidth, windowHeight, enemyList);
+            enemyManager = new EnemyManager(renderer.RendererHandle, windowWidth, windowHeight, enemyList);
 
             // Initialize parallax backgrounds
             backgrounds.Add(new Background("Assets/Background/background_1.png", renderer.RendererHandle, 1));
-            //backgrounds.Add(new Background("Assets/Background/background_2.png", renderer.RendererHandle, 2));
-            //backgrounds.Add(new Background("Assets/Background/background_3.png", renderer.RendererHandle, 3));
-            //backgrounds.Add(new Background("Assets/Background/background_4.png", renderer.RendererHandle, 4));
+            // Initialize title screen
+            titleScreen = new TitleScreen("Assets/TitleScreen/title_screen.png", renderer.RendererHandle);
         }
 
         public void Run()
@@ -73,29 +73,73 @@ namespace Space_Shooter
 
         private void HandleEvents()
         {
-            isRunning = inputHandler.HandleInput(player);
+            SDL.SDL_Event e;
+            while (SDL.SDL_PollEvent(out e) != 0)
+            {
+                if (e.type == SDL.SDL_EventType.SDL_QUIT)
+                {
+                    isRunning = false;
+                }
+                else if (e.type == SDL.SDL_EventType.SDL_KEYDOWN)
+                {
+                    if (e.key.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE)
+                    {
+                        isRunning = false;
+                    }
+                    else if (e.key.keysym.sym == SDL.SDL_Keycode.SDLK_SPACE)
+                    {
+                        if (gameState == GameState.TitleScreen)
+                        {
+                            gameState = GameState.Playing;
+                        }
+                    }
+                }
+            }
+
+            // Oyuncu hareketini yalnızca oyun oynanırken işleme
+            if (gameState == GameState.Playing)
+            {
+                int numKeys;
+                IntPtr keysPtr = SDL.SDL_GetKeyboardState(out numKeys);
+                byte[] keys = new byte[numKeys];
+                System.Runtime.InteropServices.Marshal.Copy(keysPtr, keys, 0, numKeys);
+
+                player.HandleInput(keys);
+            }
         }
 
         private void Update()
         {
-            player.Update();
-            spawnEnemy.Update(player);
-            foreach (var bg in backgrounds)
+            if (gameState == GameState.Playing)
             {
-                bg.Update();
+                player.Update();
+                enemyManager.Update(player);
+                foreach (var bg in backgrounds)
+                {
+                    bg.Update();
+                }
             }
         }
 
         private void Render()
         {
             renderer.Clear();
-            foreach (var bg in backgrounds)
+
+            if (gameState == GameState.TitleScreen)
             {
-                renderer.DrawBackground(bg);
+                titleScreen.Render(renderer.RendererHandle);
             }
-            renderer.Draw(player);
-            player.RenderProjectiles(renderer);
-            spawnEnemy.Render(renderer);
+            else if (gameState == GameState.Playing)
+            {
+                foreach (var bg in backgrounds)
+                {
+                    renderer.DrawBackground(bg);
+                }
+                renderer.Draw(player);
+                player.RenderProjectiles(renderer);
+                enemyManager.Render(renderer);
+            }
+
             renderer.Present();
         }
 
@@ -105,6 +149,7 @@ namespace Space_Shooter
             {
                 bg.Cleanup();
             }
+            titleScreen.Cleanup();
             renderer.Cleanup();
             SDL.SDL_DestroyWindow(window);
             SDL.SDL_Quit();
