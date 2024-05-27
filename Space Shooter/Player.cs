@@ -9,14 +9,16 @@ namespace Space_Shooter
         public int PositionX { get; private set; }
         public int PositionY { get; private set; }
         private List<Projectile> projectiles;
+        private List<Enemy> enemies;
         private uint lastShootTime;
         private int shootInterval = 500; // milliseconds
 
-        public Player(IntPtr renderer, int w, int h) : base((w - 100) / 2, (h - 100) / 2, 100, 100)
+        public Player(IntPtr renderer, int w, int h, List<Enemy> enemies) : base((w - 100) / 2, (h - 100) / 2, 100, 100)
         {
             assetPath = "Assets/Player/player.png";
             this.PositionX = (w - 100) / 2;
             this.PositionY = (h - 100) / 2;
+            this.enemies = enemies;
             projectiles = new List<Projectile>();
             lastShootTime = SDL.SDL_GetTicks();
         }
@@ -25,6 +27,7 @@ namespace Space_Shooter
         {
             // Update player state here
             UpdateProjectiles();
+            CollisionManager.CheckCollisions(projectiles, enemies, this);
         }
 
         public void HandleInput(byte[] keys)

@@ -12,8 +12,11 @@ namespace Space_Shooter
         private InputHandler inputHandler;
         private Player player;
         private SpawnEnemy spawnEnemy;
+        private List<Enemy> enemyList;
         private List<Background> backgrounds;
         public int windowWidth, windowHeight;
+        
+
 
         public Game()
         {
@@ -44,14 +47,15 @@ namespace Space_Shooter
             renderer.Init(window);
 
             SDL.SDL_GetWindowSize(window, out windowWidth, out windowHeight);
-            player = new Player(renderer.RendererHandle, windowWidth, windowHeight);
-            spawnEnemy = new SpawnEnemy(renderer.RendererHandle, windowWidth, windowHeight);
+            enemyList = new List<Enemy>();
+            player = new Player(renderer.RendererHandle, windowWidth, windowHeight, enemyList);
+            spawnEnemy = new SpawnEnemy(renderer.RendererHandle, windowWidth, windowHeight, enemyList);
 
-            // Initialize backgrounds
+            // Initialize parallax backgrounds
             backgrounds.Add(new Background("Assets/Background/background_1.png", renderer.RendererHandle, 1));
             //backgrounds.Add(new Background("Assets/Background/background_2.png", renderer.RendererHandle, 2));
             //backgrounds.Add(new Background("Assets/Background/background_3.png", renderer.RendererHandle, 3));
-            backgrounds.Add(new Background("Assets/Background/background_4.png", renderer.RendererHandle, 4));
+            //backgrounds.Add(new Background("Assets/Background/background_4.png", renderer.RendererHandle, 4));
         }
 
         public void Run()

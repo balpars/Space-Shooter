@@ -5,7 +5,7 @@ namespace Space_Shooter
     public class Projectile : GameObject
     {
         protected string? assetPath;
-        public int Speed { get; private set; } = 5; // Move upwards
+        public int Speed { get; private set; } = 5;
 
         public Projectile(int x, int y, int size, bool isUpwards) : base(x, y, size, size)
         {
