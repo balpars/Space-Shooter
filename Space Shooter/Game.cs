@@ -15,6 +15,7 @@ namespace Space_Shooter
         private List<Enemy> enemyList;
         private List<Background> backgrounds;
         private TitleScreen titleScreen;
+        private List<CollisionEffect> collisionEffects;
         public int windowWidth, windowHeight;
         private GameState gameState;
         private IntPtr backgroundMusic;
@@ -27,6 +28,7 @@ namespace Space_Shooter
             renderer = new Renderer();
             inputHandler = new InputHandler();
             backgrounds = new List<Background>();
+            collisionEffects = new List<CollisionEffect>();
             gameState = GameState.TitleScreen;
         }
 
@@ -49,7 +51,7 @@ namespace Space_Shooter
             window = SDL.SDL_CreateWindow(title, SDL.SDL_WINDOWPOS_UNDEFINED, SDL.SDL_WINDOWPOS_UNDEFINED, width, height, SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN);
             if (window == IntPtr.Zero)
             {
-                Console.WriteLine($"Window could not be created! SDL_Error: {SDL.SDL_GetError()}");
+                //Console.WriteLine($"Window could not be created! SDL_Error: {SDL.SDL_GetError()}");
                 isRunning = false;
                 return;
             }
@@ -136,6 +138,7 @@ namespace Space_Shooter
                 player.Update();
                 enemyManager.Update(player);
                 CollisionManager.CheckCollisions(player.GetProjectiles(), enemyList, player, this);
+                UpdateCollisionEffects();
                 foreach (var bg in backgrounds)
                 {
                     bg.Update();
@@ -160,9 +163,30 @@ namespace Space_Shooter
                 renderer.Draw(player);
                 player.RenderProjectiles(renderer);
                 enemyManager.Render(renderer);
+                RenderCollisionEffects();
             }
 
             renderer.Present();
+        }
+
+        private void UpdateCollisionEffects()
+        {
+            for (int i = collisionEffects.Count - 1; i >= 0; i--)
+            {
+                if (!collisionEffects[i].IsActive())
+                {
+                    collisionEffects[i].Cleanup();
+                    collisionEffects.RemoveAt(i);
+                }
+            }
+        }
+
+        private void RenderCollisionEffects()
+        {
+            foreach (var effect in collisionEffects)
+            {
+                effect.Render(renderer.RendererHandle);
+            }
         }
 
         private void Cleanup()
@@ -173,6 +197,11 @@ namespace Space_Shooter
             }
             titleScreen.Cleanup();
             renderer.Cleanup();
+
+            foreach (var effect in collisionEffects)
+            {
+                effect.Cleanup();
+            }
 
             // Free sounds
             SDL_mixer.Mix_FreeMusic(backgroundMusic);
@@ -186,6 +215,11 @@ namespace Space_Shooter
         public void PlayCollisionSound()
         {
             SoundManager.PlaySound(collisionSound);
+        }
+
+        public void AddCollisionEffect(int x, int y)
+        {
+            collisionEffects.Add(new CollisionEffect(x, y, 50, "Assets/Effects/collision.png", 500, renderer.RendererHandle));
         }
     }
 }

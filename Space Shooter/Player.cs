@@ -15,6 +15,8 @@ namespace Space_Shooter
         private uint lastShootTime;
         private int shootInterval = 500; // milliseconds
         private Game game;
+        private int triangleHeight; // Triangle height for the player
+        private int triangleBase; // Triangle base for the player
 
         public Player(IntPtr renderer, int w, int h, List<Enemy> enemies, Game game) : base((w - 100) / 2, (h - 100) / 2, 100, 100)
         {
@@ -27,6 +29,8 @@ namespace Space_Shooter
             this.game = game;
             projectiles = new List<Projectile>();
             lastShootTime = SDL.SDL_GetTicks();
+            triangleHeight = 40; // Set the height of the triangle
+            triangleBase = 20; // Set the base of the triangle
         }
 
         public override void Update()
@@ -113,6 +117,17 @@ namespace Space_Shooter
         public List<Projectile> GetProjectiles()
         {
             return projectiles;
+        }
+
+        public List<Point> GetVertices()
+        {
+            List<Point> vertices = new List<Point>
+            {
+                new Point(PositionX + rect.w / 2, PositionY + rect.h / 2 - triangleHeight), // Top vertex
+                new Point(PositionX + rect.w / 2 - triangleBase / 2, PositionY + rect.h / 2 + triangleHeight), // Bottom left vertex
+                new Point(PositionX + rect.w / 2 + triangleBase / 2, PositionY + rect.h / 2 + triangleHeight) // Bottom right vertex
+            };
+            return vertices;
         }
     }
 }
