@@ -14,8 +14,9 @@ namespace Space_Shooter
         private List<Enemy> enemies;
         private uint lastShootTime;
         private int shootInterval = 500; // milliseconds
+        private Game game;
 
-        public Player(IntPtr renderer, int w, int h, List<Enemy> enemies) : base((w - 100) / 2, (h - 100) / 2, 100, 100)
+        public Player(IntPtr renderer, int w, int h, List<Enemy> enemies, Game game) : base((w - 100) / 2, (h - 100) / 2, 100, 100)
         {
             assetPath = "Assets/Player/player.png";
             this.PositionX = (w - 100) / 2;
@@ -23,6 +24,7 @@ namespace Space_Shooter
             this.screenWidth = w;
             this.screenHeight = h;
             this.enemies = enemies;
+            this.game = game;
             projectiles = new List<Projectile>();
             lastShootTime = SDL.SDL_GetTicks();
         }
@@ -30,7 +32,7 @@ namespace Space_Shooter
         public override void Update()
         {
             UpdateProjectiles();
-            CollisionManager.CheckCollisions(projectiles, enemies, this);
+            CollisionManager.CheckCollisions(projectiles, enemies, this, game);
         }
 
         public void HandleInput(byte[] keys)

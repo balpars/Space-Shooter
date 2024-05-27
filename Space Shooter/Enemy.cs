@@ -36,6 +36,7 @@ namespace Space_Shooter
     {
         private IntPtr renderer;
         private Random random;
+        private Game game;
 
         private int objectSize = 45;
         private int projectileSize = 40;
@@ -50,11 +51,12 @@ namespace Space_Shooter
         private uint lastSpawnTime;
         private int spawnInterval = 2000;
 
-        public EnemyManager(IntPtr renderer, int screenWidth, int screenHeight, List<Enemy> enemies)
+        public EnemyManager(IntPtr renderer, int screenWidth, int screenHeight, List<Enemy> enemies, Game game)
         {
             this.renderer = renderer;
             this.screenWidth = screenWidth;
             this.screenHeight = screenHeight;
+            this.game = game;
             random = new Random();
             projectiles = new List<Projectile>();
             this.enemies = enemies;
@@ -85,7 +87,7 @@ namespace Space_Shooter
                 }
             }
 
-            CollisionManager.CheckCollisions(projectiles, enemies, player);
+            CollisionManager.CheckCollisions(projectiles, enemies, player, game);
 
             if (currentTime > lastShootTime + shootInterval)
             {

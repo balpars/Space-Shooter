@@ -4,7 +4,7 @@ using SDL2;
 
 namespace Space_Shooter
 {
-    class Game
+    public class Game // This class needs to be public
     {
         private bool isRunning;
         private IntPtr window;
@@ -17,6 +17,8 @@ namespace Space_Shooter
         private TitleScreen titleScreen;
         public int windowWidth, windowHeight;
         private GameState gameState;
+        private IntPtr backgroundMusic;
+        private IntPtr collisionSound;
 
         public Game()
         {
@@ -37,6 +39,13 @@ namespace Space_Shooter
                 return;
             }
 
+            if (SDL_mixer.Mix_OpenAudio(22050, SDL.AUDIO_S16SYS, 2, 4096) == -1)
+            {
+                //Console.WriteLine($"SDL_mixer could not initialize! SDL_mixer Error: {SDL_mixer.Mix_GetError()}");
+                isRunning = false;
+                return;
+            }
+
             window = SDL.SDL_CreateWindow(title, SDL.SDL_WINDOWPOS_UNDEFINED, SDL.SDL_WINDOWPOS_UNDEFINED, width, height, SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN);
             if (window == IntPtr.Zero)
             {
@@ -49,13 +58,25 @@ namespace Space_Shooter
 
             SDL.SDL_GetWindowSize(window, out windowWidth, out windowHeight);
             enemyList = new List<Enemy>();
-            player = new Player(renderer.RendererHandle, windowWidth, windowHeight, enemyList);
-            enemyManager = new EnemyManager(renderer.RendererHandle, windowWidth, windowHeight, enemyList);
+            player = new Player(renderer.RendererHandle, windowWidth, windowHeight, enemyList, this);
+            enemyManager = new EnemyManager(renderer.RendererHandle, windowWidth, windowHeight, enemyList, this);
 
             // Initialize parallax backgrounds
             backgrounds.Add(new Background("Assets/Background/background_1.png", renderer.RendererHandle, 1));
             // Initialize title screen
             titleScreen = new TitleScreen("Assets/TitleScreen/title_screen.png", renderer.RendererHandle);
+
+            // Load sounds
+            backgroundMusic = SDL_mixer.Mix_LoadMUS("Assets/Sounds/background_music.mp3");
+            if (backgroundMusic == IntPtr.Zero)
+            {
+                //Console.WriteLine($"Failed to load background music! SDL_mixer Error: {SDL_mixer.Mix_GetError()}");
+            }
+
+            collisionSound = SoundManager.LoadSound("Assets/Sounds/collision.wav");
+
+            // Play background music
+            SDL_mixer.Mix_PlayMusic(backgroundMusic, -1);
         }
 
         public void Run()
@@ -114,6 +135,7 @@ namespace Space_Shooter
             {
                 player.Update();
                 enemyManager.Update(player);
+                CollisionManager.CheckCollisions(player.GetProjectiles(), enemyList, player, this);
                 foreach (var bg in backgrounds)
                 {
                     bg.Update();
@@ -151,8 +173,19 @@ namespace Space_Shooter
             }
             titleScreen.Cleanup();
             renderer.Cleanup();
+
+            // Free sounds
+            SDL_mixer.Mix_FreeMusic(backgroundMusic);
+            SDL_mixer.Mix_FreeChunk(collisionSound);
+            SoundManager.Cleanup();
+
             SDL.SDL_DestroyWindow(window);
             SDL.SDL_Quit();
+        }
+
+        public void PlayCollisionSound()
+        {
+            SoundManager.PlaySound(collisionSound);
         }
     }
 }
