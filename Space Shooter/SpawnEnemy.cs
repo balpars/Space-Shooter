@@ -31,7 +31,7 @@ namespace Space_Shooter
             random = new Random();
             projectiles = new List<Projectile>();
             enemies = new List<Enemy>();
-            createenemy();
+            CreatEnemy();
             lastShootTime = SDL.SDL_GetTicks();
             lastSpawnTime = SDL.SDL_GetTicks();
         }
@@ -50,7 +50,7 @@ namespace Space_Shooter
                 }
                 else
                 {
-                    Console.WriteLine($"enemy at ({enemies[i].GetRect().x}, {enemies[i].GetRect().y})");
+                    //Console.WriteLine($"enemy at ({enemies[i].GetRect().x}, {enemies[i].GetRect().y})");
                 }
             }
 
@@ -64,7 +64,7 @@ namespace Space_Shooter
                 }
                 else
                 {
-                    Console.WriteLine($"Projectile at ({projectiles[i].GetRect().x}, {projectiles[i].GetRect().y})");
+                    //Console.WriteLine($"Projectile at ({projectiles[i].GetRect().x}, {projectiles[i].GetRect().y})");
                 }
             }
 
@@ -81,7 +81,7 @@ namespace Space_Shooter
             // Handle spawning new objects
             if (currentTime > lastSpawnTime + spawnInterval)
             {
-                createenemy();
+                CreatEnemy();
                 lastSpawnTime = currentTime;
             }
         }
@@ -99,11 +99,12 @@ namespace Space_Shooter
             }
         }
 
-        private void createenemy()
+        private void CreatEnemy()
         {
             int objectX = random.Next(0, screenWidth - objectSize);
             int objectY = -objectSize;
-            enemies.Add(new BasicEnemy(objectX, -50, objectSize)); Console.WriteLine($"enemy from ({objectX}, {objectY})");
+            enemies.Add(new BasicEnemy(objectX, -50, objectSize)); 
+            //Console.WriteLine($"enemy from ({objectX}, {objectY})");
         }
 
         private void Shoot()
@@ -113,7 +114,7 @@ namespace Space_Shooter
                 int projectileX = enemy.GetRect().x + objectSize / 2 -23;
                 int projectileY = enemy.GetRect().y + objectSize -5;
                 projectiles.Add(new BasicProjectile(projectileX, projectileY, projectileSize)); 
-                Console.WriteLine($"Projectile from ({projectileX}, {projectileY})");
+                // Console.WriteLine($"Projectile from ({projectileX}, {projectileY})");
             }
         }
 
