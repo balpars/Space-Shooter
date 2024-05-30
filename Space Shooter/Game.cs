@@ -37,19 +37,20 @@ namespace Space_Shooter
         {
             if (SDL.SDL_Init(SDL.SDL_INIT_VIDEO | SDL.SDL_INIT_GAMECONTROLLER) < 0)
             {
-                //Console.WriteLine($"SDL could not initialize! SDL_Error: {SDL.SDL_GetError()}");
+                Console.WriteLine($"SDL could not initialize! SDL_Error: {SDL.SDL_GetError()}");
                 isRunning = false;
                 return;
             }
 
             if (SDL_mixer.Mix_OpenAudio(22050, SDL.AUDIO_S16SYS, 2, 4096) == -1)
             {
-                //Console.WriteLine($"SDL_mixer could not initialize! SDL_mixer Error: {SDL_mixer.Mix_GetError()}");
+                Console.WriteLine($"SDL_mixer could not initialize! SDL_mixer Error: {SDL.SDL_GetError()}");
                 isRunning = false;
                 return;
             }
 
-            window = SDL.SDL_CreateWindow(title, SDL.SDL_WINDOWPOS_UNDEFINED, SDL.SDL_WINDOWPOS_UNDEFINED, width, height, SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN);
+            // Create window with SDL_WINDOW_FULLSCREEN_DESKTOP flag to make it fullscreen
+            window = SDL.SDL_CreateWindow(title, SDL.SDL_WINDOWPOS_UNDEFINED, SDL.SDL_WINDOWPOS_UNDEFINED, width, height, SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN_DESKTOP);
             if (window == IntPtr.Zero)
             {
                 Console.WriteLine($"Window could not be created! SDL_Error: {SDL.SDL_GetError()}");
@@ -65,15 +66,18 @@ namespace Space_Shooter
             enemyManager = new EnemyManager(renderer.RendererHandle, windowWidth, windowHeight, enemyList, this);
 
             // Initialize parallax backgrounds
-            backgrounds.Add(new Background("Assets/Background/background_1.png", renderer.RendererHandle, 1));
+            var bg = new Background("Assets/Background/background_1.png", renderer.RendererHandle, 1, windowWidth, windowHeight);
+            backgrounds.Add(bg);
+
             // Initialize title screen
             titleScreen = new TitleScreen("Assets/TitleScreen/title_screen.png", renderer.RendererHandle);
+            titleScreen.SetFullScreen(windowWidth, windowHeight);
 
             // Load sounds
             backgroundMusic = SDL_mixer.Mix_LoadMUS("Assets/Sounds/background_music.mp3");
             if (backgroundMusic == IntPtr.Zero)
             {
-                //Console.WriteLine($"Failed to load background music! SDL_mixer Error: {SDL_mixer.Mix_GetError()}");
+                Console.WriteLine($"Failed to load background music! SDL_mixer Error: {SDL.SDL_GetError()}");
             }
 
             collisionSound = SoundManager.LoadSound("Assets/Sounds/collision.wav");
@@ -174,7 +178,7 @@ namespace Space_Shooter
             {
                 foreach (var bg in backgrounds)
                 {
-                    renderer.DrawBackground(bg);
+                    bg.Render(renderer.RendererHandle);
                 }
                 renderer.Draw(player);
                 player.RenderProjectiles(renderer);
