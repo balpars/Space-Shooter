@@ -1,35 +1,18 @@
 ﻿using SDL2;
+using System;
 
 namespace Space_Shooter
 {
-    class InputHandler
+    public class InputHandler
     {
-        public bool HandleInput(Player player)
+        public void HandleInput(Player player, IntPtr gameController)
         {
-            SDL.SDL_Event e;
-            while (SDL.SDL_PollEvent(out e) != 0)
-            {
-                if (e.type == SDL.SDL_EventType.SDL_QUIT)
-                {
-                    return false;
-                }
-                else if (e.type == SDL.SDL_EventType.SDL_KEYDOWN)
-                {
-                    // Check if the ESC key was pressed
-                    if (e.key.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE)
-                    {
-                        return false; // Quit the game
-                    }
-                }
-            }
-
             int numKeys;
             IntPtr keysPtr = SDL.SDL_GetKeyboardState(out numKeys);
             byte[] keys = new byte[numKeys];
             System.Runtime.InteropServices.Marshal.Copy(keysPtr, keys, 0, numKeys);
 
-            player.HandleInput(keys);
-            return true;
+            player.HandleInput(keys, gameController);
         }
     }
 }

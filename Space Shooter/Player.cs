@@ -39,7 +39,7 @@ namespace Space_Shooter
             CollisionManager.CheckCollisions(projectiles, enemies, this, game);
         }
 
-        public void HandleInput(byte[] keys)
+        public void HandleInput(byte[] keys, IntPtr gameController)
         {
             int newX = PositionX;
             int newY = PositionY;
@@ -63,6 +63,36 @@ namespace Space_Shooter
             if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_SPACE] == 1)
             {
                 Shoot();
+            }
+
+            if (gameController != IntPtr.Zero)
+            {
+                int leftX = SDL.SDL_GameControllerGetAxis(gameController, SDL.SDL_GameControllerAxis.SDL_CONTROLLER_AXIS_LEFTX);
+                int leftY = SDL.SDL_GameControllerGetAxis(gameController, SDL.SDL_GameControllerAxis.SDL_CONTROLLER_AXIS_LEFTY);
+
+                const int DEAD_ZONE = 8000;
+
+                if (leftX < -DEAD_ZONE)
+                {
+                    newX -= 5;
+                }
+                if (leftX > DEAD_ZONE)
+                {
+                    newX += 5;
+                }
+                if (leftY < -DEAD_ZONE)
+                {
+                    newY -= 5;
+                }
+                if (leftY > DEAD_ZONE)
+                {
+                    newY += 5;
+                }
+
+                if (SDL.SDL_GameControllerGetButton(gameController, SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_X) == 1)
+                {
+                    Shoot();
+                }
             }
 
             // Ekran sınırları içinde kalmayı sağla

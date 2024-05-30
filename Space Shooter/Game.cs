@@ -20,6 +20,7 @@ namespace Space_Shooter
         private GameState gameState;
         private IntPtr backgroundMusic;
         private IntPtr collisionSound;
+        private IntPtr gameController;
 
         public Game()
         {
@@ -34,9 +35,9 @@ namespace Space_Shooter
 
         public void Init(string title, int width, int height)
         {
-            if (SDL.SDL_Init(SDL.SDL_INIT_VIDEO) < 0)
+            if (SDL.SDL_Init(SDL.SDL_INIT_VIDEO | SDL.SDL_INIT_GAMECONTROLLER) < 0)
             {
-                Console.WriteLine($"SDL could not initialize! SDL_Error: {SDL.SDL_GetError()}");
+                //Console.WriteLine($"SDL could not initialize! SDL_Error: {SDL.SDL_GetError()}");
                 isRunning = false;
                 return;
             }
@@ -51,7 +52,7 @@ namespace Space_Shooter
             window = SDL.SDL_CreateWindow(title, SDL.SDL_WINDOWPOS_UNDEFINED, SDL.SDL_WINDOWPOS_UNDEFINED, width, height, SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN);
             if (window == IntPtr.Zero)
             {
-                //Console.WriteLine($"Window could not be created! SDL_Error: {SDL.SDL_GetError()}");
+                Console.WriteLine($"Window could not be created! SDL_Error: {SDL.SDL_GetError()}");
                 isRunning = false;
                 return;
             }
@@ -76,6 +77,16 @@ namespace Space_Shooter
             }
 
             collisionSound = SoundManager.LoadSound("Assets/Sounds/collision.wav");
+
+            // Open game controller
+            if (SDL.SDL_NumJoysticks() > 0)
+            {
+                gameController = SDL.SDL_GameControllerOpen(0);
+                if (gameController == IntPtr.Zero)
+                {
+                    Console.WriteLine($"Could not open game controller! SDL_Error: {SDL.SDL_GetError()}");
+                }
+            }
 
             // Play background music
             SDL_mixer.Mix_PlayMusic(backgroundMusic, -1);
@@ -117,17 +128,22 @@ namespace Space_Shooter
                         }
                     }
                 }
+                else if (e.type == SDL.SDL_EventType.SDL_CONTROLLERBUTTONDOWN)
+                {
+                    if (e.cbutton.button == (byte)SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_START)
+                    {
+                        if (gameState == GameState.TitleScreen)
+                        {
+                            gameState = GameState.Playing;
+                        }
+                    }
+                }
             }
 
             // Oyuncu hareketini yalnızca oyun oynanırken işleme
             if (gameState == GameState.Playing)
             {
-                int numKeys;
-                IntPtr keysPtr = SDL.SDL_GetKeyboardState(out numKeys);
-                byte[] keys = new byte[numKeys];
-                System.Runtime.InteropServices.Marshal.Copy(keysPtr, keys, 0, numKeys);
-
-                player.HandleInput(keys);
+                inputHandler.HandleInput(player, gameController);
             }
         }
 
@@ -207,6 +223,11 @@ namespace Space_Shooter
             SDL_mixer.Mix_FreeMusic(backgroundMusic);
             SDL_mixer.Mix_FreeChunk(collisionSound);
             SoundManager.Cleanup();
+
+            if (gameController != IntPtr.Zero)
+            {
+                SDL.SDL_GameControllerClose(gameController);
+            }
 
             SDL.SDL_DestroyWindow(window);
             SDL.SDL_Quit();
