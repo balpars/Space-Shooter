@@ -1,140 +1,113 @@
 ﻿using SDL2;
 using System;
-using System.Collections.Generic;
 
 namespace Space_Shooter
 {
     public class Enemy : GameObject
     {
         protected string? assetPath; // Path to the texture asset for the enemy
+        private IntPtr renderer;
+        private IntPtr texture;
+        private bool isHit;
+        private string hitAssetPath;
+        private IntPtr hitTexture;
+        private int points;
+        private int hitLifetime; // Enemy hit lifetime in ticks
+        private int hitLifetimeRemaining;
         public int Speed { get; private set; } = 3;
 
-        public Enemy(int x, int y, int size) : base(x, y, size, size)
+        public Enemy(int x, int y, int size, IntPtr renderer, int points, int hitLifetime = 200) : base(x, y, size, size)
         {
+            this.renderer = renderer;
+            this.points = points;
+            isHit = false;
+            this.hitLifetime = hitLifetime;
+            this.hitLifetimeRemaining = hitLifetime;
+
+            if (SDL_image.IMG_Init(SDL_image.IMG_InitFlags.IMG_INIT_PNG) == 0)
+            {
+                Console.WriteLine($"Failed to initialize SDL_image! SDL_image Error: {SDL.SDL_GetError()}");
+            }
+
+            assetPath = "Assets/Enemy/enemy.png";
+            texture = SDL_image.IMG_LoadTexture(renderer, assetPath);
+            if (texture == IntPtr.Zero)
+            {
+                Console.WriteLine($"Unable to load texture {assetPath}! SDL_Error: {SDL.SDL_GetError()}");
+            }
+
+            hitAssetPath = "Assets/Enemy/hit_enemy.png";
+            hitTexture = SDL_image.IMG_LoadTexture(renderer, hitAssetPath);
+            if (hitTexture == IntPtr.Zero)
+            {
+                Console.WriteLine($"Unable to load hit texture {hitAssetPath}! SDL_Error: {SDL.SDL_GetError()}");
+            }
         }
 
         public override void Update()
         {
-            Move(0, Speed);
+            if (isHit)
+            {
+                hitLifetimeRemaining -= 16; // Assuming Update is called every ~16ms (60 FPS)
+                if (hitLifetimeRemaining <= 0)
+                {
+                    // Remove the enemy when the hit lifetime expires
+                    isHit = false; // Mark for removal
+                    rect.x = -1000; // Move it out of screen to ensure it is not rendered
+                }
+            }
+            else
+            {
+                Move(0, Speed);
+            }
+        }
+
+        public override void Render(IntPtr renderer)
+        {
+            if (hitLifetimeRemaining > 0)
+            {
+                IntPtr currentTexture = isHit ? hitTexture : texture;
+                SDL.SDL_RenderCopy(renderer, currentTexture, IntPtr.Zero, ref rect);
+            }
+        }
+
+        public void OnHit()
+        {
+            isHit = true;
+            hitLifetimeRemaining = hitLifetime; // Reset the lifetime when hit
+        }
+
+        public bool IsHit()
+        {
+            return isHit;
+        }
+
+        public bool IsExpired()
+        {
+            return !isHit && rect.x == -1000;
+        }
+
+        public int GetPoints()
+        {
+            return points;
         }
 
         public string? GetAssetPath()
         {
             return assetPath;
         }
+
+        public void Cleanup()
+        {
+            SDL.SDL_DestroyTexture(texture);
+            SDL.SDL_DestroyTexture(hitTexture);
+        }
     }
 
     class BasicEnemy : Enemy
     {
-        public BasicEnemy(int x, int y, int size) : base(x, y, size)
+        public BasicEnemy(int x, int y, int size, IntPtr renderer) : base(x, y, size, renderer, 100)
         {
-            assetPath = "Assets/Enemy/enemy.png"; // Define the asset path for the basic enemy
-        }
-    }
-
-    public class EnemyManager
-    {
-        private IntPtr renderer;
-        private Random random;
-        private Game game;
-
-        private int objectSize = 45;
-        private int projectileSize = 40;
-        private int screenWidth;
-        private int screenHeight;
-
-        public List<Projectile> projectiles;
-        private int shootInterval = 400;
-        private uint lastShootTime;
-
-        private List<Enemy> enemies;
-        private uint lastSpawnTime;
-        private int spawnInterval = 2000;
-
-        public EnemyManager(IntPtr renderer, int screenWidth, int screenHeight, List<Enemy> enemies, Game game)
-        {
-            this.renderer = renderer;
-            this.screenWidth = screenWidth;
-            this.screenHeight = screenHeight;
-            this.game = game;
-            random = new Random();
-            projectiles = new List<Projectile>();
-            this.enemies = enemies;
-            CreateEnemy();
-            lastShootTime = SDL.SDL_GetTicks();
-            lastSpawnTime = SDL.SDL_GetTicks();
-        }
-
-        public void Update(Player player)
-        {
-            uint currentTime = SDL.SDL_GetTicks();
-
-            for (int i = enemies.Count - 1; i >= 0; i--)
-            {
-                enemies[i].Update();
-                if (enemies[i].GetRect().y > screenHeight)
-                {
-                    enemies.RemoveAt(i);
-                }
-            }
-
-            for (int i = projectiles.Count - 1; i >= 0; i--)
-            {
-                projectiles[i].Update();
-                if (projectiles[i].GetRect().y > screenHeight)
-                {
-                    projectiles.RemoveAt(i);
-                }
-            }
-
-            CollisionManager.CheckCollisions(projectiles, enemies, player, game);
-
-            if (currentTime > lastShootTime + shootInterval)
-            {
-                Shoot();
-                lastShootTime = currentTime;
-            }
-
-            if (currentTime > lastSpawnTime + spawnInterval)
-            {
-                CreateEnemy();
-                lastSpawnTime = currentTime;
-            }
-        }
-
-        public void Render(Renderer renderer)
-        {
-            foreach (var enemy in enemies)
-            {
-                renderer.Draw(enemy);
-            }
-
-            foreach (var projectile in projectiles)
-            {
-                renderer.Draw(projectile);
-            }
-        }
-
-        private void CreateEnemy()
-        {
-            int objectX = random.Next(0, screenWidth - objectSize);
-            int objectY = -objectSize;
-            enemies.Add(new BasicEnemy(objectX, -50, objectSize));
-        }
-
-        private void Shoot()
-        {
-            foreach (var enemy in enemies)
-            {
-                int projectileX = enemy.GetRect().x + objectSize / 2 - 23;
-                int projectileY = enemy.GetRect().y + objectSize - 5;
-                projectiles.Add(new BasicProjectile(projectileX, projectileY, projectileSize, false, enemy));
-            }
-        }
-
-        private List<Enemy> GetEnemies()
-        {
-            return this.enemies;
         }
     }
 }

@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="SDL2-CS.NetCore" Version="2.0.8" />
+    <PackageReference Include="sdl2_image.nuget" Version="2.8.2" />
     <PackageReference Include="sdl2_mixer.nuget" Version="2.8.0" />
   </ItemGroup>
 
@@ -27,6 +28,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Assets\Effects\collision.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\Enemy\hit_enemy.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\Fonts\arial.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Assets\Sounds\background_music.mp3">

@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using SDL2;
 
 namespace Space_Shooter
 {
-    public class Game // This class needs to be public
+    public class Game
     {
         private bool isRunning;
         private IntPtr window;
@@ -21,6 +22,10 @@ namespace Space_Shooter
         private IntPtr backgroundMusic;
         private IntPtr collisionSound;
         private IntPtr gameController;
+        private int score;
+        private IntPtr font;
+        private IntPtr scoreTexture;
+        private SDL.SDL_Rect scoreRect;
 
         public Game()
         {
@@ -31,6 +36,8 @@ namespace Space_Shooter
             backgrounds = new List<Background>();
             collisionEffects = new List<CollisionEffect>();
             gameState = GameState.TitleScreen;
+            score = 0;
+            scoreTexture = IntPtr.Zero;
         }
 
         public void Init(string title, int width, int height)
@@ -45,6 +52,13 @@ namespace Space_Shooter
             if (SDL_mixer.Mix_OpenAudio(22050, SDL.AUDIO_S16SYS, 2, 4096) == -1)
             {
                 Console.WriteLine($"SDL_mixer could not initialize! SDL_mixer Error: {SDL.SDL_GetError()}");
+                isRunning = false;
+                return;
+            }
+
+            if (SDL_ttf.TTF_Init() == -1)
+            {
+                Console.WriteLine($"SDL_ttf could not initialize! SDL_ttf Error: {SDL.SDL_GetError()}");
                 isRunning = false;
                 return;
             }
@@ -94,6 +108,15 @@ namespace Space_Shooter
 
             // Play background music
             SDL_mixer.Mix_PlayMusic(backgroundMusic, -1);
+
+            // Load font for score display
+            font = SDL_ttf.TTF_OpenFont("Assets/Fonts/arial.ttf", 24);
+            if (font == IntPtr.Zero)
+            {
+                Console.WriteLine($"Failed to load font! SDL_ttf Error: {SDL.SDL_GetError()}");
+            }
+
+            UpdateScoreTexture();
         }
 
         public void Run()
@@ -184,9 +207,59 @@ namespace Space_Shooter
                 player.RenderProjectiles(renderer);
                 enemyManager.Render(renderer);
                 RenderCollisionEffects();
+                RenderScore();
             }
 
             renderer.Present();
+        }
+
+        private void UpdateScoreTexture()
+        {
+            SDL.SDL_Color color = new SDL.SDL_Color { r = 255, g = 255, b = 255, a = 255 };
+            IntPtr surface = SDL_ttf.TTF_RenderText_Solid(font, $"Score: {score}", color);
+
+            if (surface == IntPtr.Zero)
+            {
+                Console.WriteLine($"Failed to create surface for score text! SDL_ttf Error: {SDL.SDL_GetError()}");
+                return;
+            }
+
+            IntPtr texture = SDL.SDL_CreateTextureFromSurface(renderer.RendererHandle, surface);
+            if (texture == IntPtr.Zero)
+            {
+                Console.WriteLine($"Failed to create texture for score text! SDL_Error: {SDL.SDL_GetError()}");
+                SDL.SDL_FreeSurface(surface);
+                return;
+            }
+
+            SDL.SDL_Surface sdlSurface = Marshal.PtrToStructure<SDL.SDL_Surface>(surface);
+
+            scoreRect = new SDL.SDL_Rect
+            {
+                x = 10,
+                y = 10,
+                w = sdlSurface.w,
+                h = sdlSurface.h
+            };
+
+            SDL.SDL_FreeSurface(surface);
+
+            if (scoreTexture != IntPtr.Zero)
+            {
+                SDL.SDL_DestroyTexture(scoreTexture);
+            }
+            scoreTexture = texture;
+        }
+
+        private void RenderScore()
+        {
+            SDL.SDL_RenderCopy(renderer.RendererHandle, scoreTexture, IntPtr.Zero, ref scoreRect);
+        }
+
+        public void IncreaseScore(int points)
+        {
+            score += points;
+            UpdateScoreTexture();
         }
 
         private void UpdateCollisionEffects()
@@ -233,7 +306,13 @@ namespace Space_Shooter
                 SDL.SDL_GameControllerClose(gameController);
             }
 
-            SDL.SDL_DestroyWindow(window);
+            SDL.SDL_DestroyTexture(scoreTexture);
+            SDL_ttf.TTF_CloseFont(font);
+
+            if (window != IntPtr.Zero)
+            {
+                SDL.SDL_DestroyWindow(window);
+            }
             SDL.SDL_Quit();
         }
 

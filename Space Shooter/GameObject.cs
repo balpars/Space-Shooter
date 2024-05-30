@@ -1,4 +1,5 @@
 ﻿using SDL2;
+using System;
 
 namespace Space_Shooter
 {
@@ -6,15 +7,17 @@ namespace Space_Shooter
     {
         protected SDL.SDL_Rect rect;
 
-        public GameObject(int x, int y, int width, int height)
+        public GameObject(int x, int y, int w, int h)
         {
-            rect = new SDL.SDL_Rect { x = x, y = y, w = width, h = height };
+            rect = new SDL.SDL_Rect { x = x, y = y, w = w, h = h };
         }
 
-        public void Move(int deltaX, int deltaY)
+        public virtual void Update()
         {
-            rect.x += deltaX;
-            rect.y += deltaY;
+        }
+
+        public virtual void Render(IntPtr renderer)
+        {
         }
 
         public SDL.SDL_Rect GetRect()
@@ -22,8 +25,10 @@ namespace Space_Shooter
             return rect;
         }
 
-        public abstract void Update();
-
-        
+        public void Move(int deltaX, int deltaY)
+        {
+            rect.x += deltaX;
+            rect.y += deltaY;
+        }
     }
 }

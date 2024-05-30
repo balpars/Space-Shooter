@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 
-
 namespace Space_Shooter
 {
     public static class CollisionManager
@@ -17,12 +16,16 @@ namespace Space_Shooter
                     var enemy = enemies[j];
                     if (projectile.Owner != enemy && IsColliding(projectile, enemy))
                     {
-                        //Console.WriteLine($"Collision detected at ({projectile.GetRect().x}, {projectile.GetRect().y})");
+                        Console.WriteLine($"Collision detected at ({projectile.GetRect().x}, {projectile.GetRect().y})");
                         int effectX = projectile.GetRect().x + projectile.GetRect().w / 2;
                         int effectY = projectile.GetRect().y + projectile.GetRect().h / 2;
                         game.AddCollisionEffect(effectX, effectY);
                         projectiles.RemoveAt(i);
-                        enemies.RemoveAt(j);
+                        if (!enemy.IsHit())
+                        {
+                            enemy.OnHit();
+                            game.IncreaseScore(enemy.GetPoints());
+                        }
                         game.PlayCollisionSound();
                         break; // Break out of the inner loop to avoid issues with index shifting
                     }
@@ -30,7 +33,7 @@ namespace Space_Shooter
 
                 if (projectile.Owner is Enemy && IsColliding(projectile, player))
                 {
-                    //Console.WriteLine($"Collision detected between enemy projectile and player at ({projectile.GetRect().x}, {projectile.GetRect().y})");
+                    Console.WriteLine($"Collision detected between enemy projectile and player at ({projectile.GetRect().x}, {projectile.GetRect().y})");
                     int effectX = projectile.GetRect().x + projectile.GetRect().w / 2;
                     int effectY = projectile.GetRect().y + projectile.GetRect().h / 2;
                     game.AddCollisionEffect(effectX, effectY);
@@ -45,11 +48,15 @@ namespace Space_Shooter
                 var enemy = enemies[i];
                 if (IsColliding(player, enemy))
                 {
-                    //Console.WriteLine($"Collision detected between player and enemy at ({enemy.GetRect().x}, {enemy.GetRect().y})");
+                    Console.WriteLine($"Collision detected between player and enemy at ({enemy.GetRect().x}, {enemy.GetRect().y})");
                     int effectX = enemy.GetRect().x + enemy.GetRect().w / 2;
                     int effectY = enemy.GetRect().y + enemy.GetRect().h / 2;
                     game.AddCollisionEffect(effectX, effectY);
-                    enemies.RemoveAt(i);
+                    if (!enemy.IsHit())
+                    {
+                        enemy.OnHit();
+                        game.IncreaseScore(enemy.GetPoints());
+                    }
                     game.PlayCollisionSound();
                 }
             }
