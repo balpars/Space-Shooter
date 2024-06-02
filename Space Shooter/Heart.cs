@@ -8,7 +8,7 @@ namespace Space_Shooter
 
         public Heart(int x, int y, int size) : base(x, y, size, size)
         {
-            assetPath = "C:\\Users\\ebrar\\Source\\Repos\\Space-Shooter\\Space Shooter\\Assets\\Heart\\heart.png"; // Path to your heart image
+            assetPath = "Assets/Heart/heart.png"; // Path to your heart image
         }
 
         public override void Update()

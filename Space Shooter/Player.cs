@@ -21,8 +21,6 @@ namespace Space_Shooter
         private int speed;
         public List<Heart> hearts;
 
-
-
         public Player(IntPtr renderer, int w, int h, List<Enemy> enemies, Game game, int health) : base((w - 100) / 2, (h - 100) / 2, 100, 100)
         {
             assetPath = "Assets/Player/player.png";
@@ -41,7 +39,7 @@ namespace Space_Shooter
             hearts = new List<Heart>();
             for (int i = 0; i < health; i++)
             {
-                hearts.Add(new Heart(1300+ (i * 30), 20, 70)); // Adjust the position and size as needed
+                hearts.Add(new Heart((screenWidth / 2) - (health * 15) + (i * 30), 20, 70)); // Adjust the position and size as needed
             }
         }
 
@@ -143,12 +141,13 @@ namespace Space_Shooter
                 }
             }
         }
+
         public void UpdateHearts()
         {
             hearts.Clear();
             for (int i = 0; i < Health; i++)
             {
-                hearts.Add(new Heart(1300 + (i * 30), 20, 70));
+                hearts.Add(new Heart((screenWidth / 2) - (Health * 15) + (i * 30), 20, 70)); // Adjust the position and size as needed
             }
         }
 
@@ -159,6 +158,7 @@ namespace Space_Shooter
                 projectile.Render(renderer);
             }
         }
+
         public void RenderHearts(Renderer renderer)
         {
             foreach (var heart in hearts)
