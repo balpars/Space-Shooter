@@ -1,4 +1,6 @@
-﻿using System;
+﻿// File: Game.cs
+
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using SDL2;
@@ -17,6 +19,7 @@ namespace Space_Shooter
         private List<Background> backgrounds;
         private TitleScreen titleScreen;
         private List<CollisionEffect> collisionEffects;
+        private List<Projectile> projectiles;
         public int windowWidth, windowHeight;
         private GameState gameState;
         private IntPtr backgroundMusic;
@@ -27,6 +30,8 @@ namespace Space_Shooter
         private IntPtr scoreTexture;
         private SDL.SDL_Rect scoreRect;
         private int playerHealth;
+        private GameOver gameOver;
+        private IntPtr gameOverSound; // Add this line
 
         public Game()
         {
@@ -36,6 +41,7 @@ namespace Space_Shooter
             inputHandler = new InputHandler();
             backgrounds = new List<Background>();
             collisionEffects = new List<CollisionEffect>();
+            projectiles = new List<Projectile>();
             gameState = GameState.TitleScreen;
             score = 0;
             scoreTexture = IntPtr.Zero;
@@ -65,7 +71,6 @@ namespace Space_Shooter
                 return;
             }
 
-            // Create window with SDL_WINDOW_FULLSCREEN_DESKTOP flag to make it fullscreen
             window = SDL.SDL_CreateWindow(title, SDL.SDL_WINDOWPOS_UNDEFINED, SDL.SDL_WINDOWPOS_UNDEFINED, width, height, SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN_DESKTOP);
             if (window == IntPtr.Zero)
             {
@@ -81,15 +86,12 @@ namespace Space_Shooter
             player = new Player(renderer.RendererHandle, windowWidth, windowHeight, enemyList, this, playerHealth);
             enemyManager = new EnemyManager(renderer.RendererHandle, windowWidth, windowHeight, enemyList, this);
 
-            // Initialize parallax backgrounds
             var bg = new Background("Assets/Background/background_1.png", renderer.RendererHandle, 1, windowWidth, windowHeight);
             backgrounds.Add(bg);
 
-            // Initialize title screen
             titleScreen = new TitleScreen("Assets/TitleScreen/title_screen.png", renderer.RendererHandle);
             titleScreen.SetFullScreen(windowWidth, windowHeight);
 
-            // Load sounds
             backgroundMusic = SDL_mixer.Mix_LoadMUS("Assets/Sounds/background_music.mp3");
             if (backgroundMusic == IntPtr.Zero)
             {
@@ -97,8 +99,8 @@ namespace Space_Shooter
             }
 
             collisionSound = SoundManager.LoadSound("Assets/Sounds/collision.wav");
+            gameOverSound = SoundManager.LoadSound("Assets/Sounds/game_over.wav"); // Add this line
 
-            // Open game controller
             if (SDL.SDL_NumJoysticks() > 0)
             {
                 gameController = SDL.SDL_GameControllerOpen(0);
@@ -108,10 +110,8 @@ namespace Space_Shooter
                 }
             }
 
-            // Play background music
             SDL_mixer.Mix_PlayMusic(backgroundMusic, -1);
 
-            // Load font for score display
             font = SDL_ttf.TTF_OpenFont("Assets/Fonts/arial.ttf", 24);
             if (font == IntPtr.Zero)
             {
@@ -119,6 +119,8 @@ namespace Space_Shooter
             }
 
             UpdateScoreTexture();
+
+            gameOver = new GameOver("Assets/GameOver/game_over.png", renderer.RendererHandle, windowWidth, windowHeight);
         }
 
         public void Run()
@@ -155,6 +157,10 @@ namespace Space_Shooter
                         {
                             gameState = GameState.Playing;
                         }
+                        else if (gameState == GameState.GameOver)
+                        {
+                            RestartGame();
+                        }
                     }
                 }
                 else if (e.type == SDL.SDL_EventType.SDL_CONTROLLERBUTTONDOWN)
@@ -165,11 +171,14 @@ namespace Space_Shooter
                         {
                             gameState = GameState.Playing;
                         }
+                        else if (gameState == GameState.GameOver)
+                        {
+                            RestartGame();
+                        }
                     }
                 }
             }
 
-            // Oyuncu hareketini yalnızca oyun oynanırken işleme
             if (gameState == GameState.Playing)
             {
                 inputHandler.HandleInput(player, gameController);
@@ -211,6 +220,10 @@ namespace Space_Shooter
                 enemyManager.Render(renderer);
                 RenderCollisionEffects();
                 RenderScore();
+            }
+            else if (gameState == GameState.GameOver)
+            {
+                gameOver.Render(renderer.RendererHandle);
             }
 
             renderer.Present();
@@ -299,9 +312,9 @@ namespace Space_Shooter
                 effect.Cleanup();
             }
 
-            // Free sounds
             SDL_mixer.Mix_FreeMusic(backgroundMusic);
             SDL_mixer.Mix_FreeChunk(collisionSound);
+            SDL_mixer.Mix_FreeChunk(gameOverSound); // Add this line
             SoundManager.Cleanup();
 
             if (gameController != IntPtr.Zero)
@@ -327,6 +340,25 @@ namespace Space_Shooter
         public void AddCollisionEffect(int x, int y)
         {
             collisionEffects.Add(new CollisionEffect(x, y, 50, "Assets/Effects/collision.png", 500, renderer.RendererHandle));
+        }
+
+        public void GameOver()
+        {
+            gameState = GameState.GameOver;
+            SoundManager.PlaySound(gameOverSound); // Add this line
+        }
+
+        private void RestartGame()
+        {
+            // Reset game state
+            score = 0;
+            playerHealth = 5;
+            enemyList.Clear();
+            projectiles.Clear();
+            player = new Player(renderer.RendererHandle, windowWidth, windowHeight, enemyList, this, playerHealth);
+            enemyManager = new EnemyManager(renderer.RendererHandle, windowWidth, windowHeight, enemyList, this);
+            UpdateScoreTexture();
+            gameState = GameState.Playing;
         }
     }
 }

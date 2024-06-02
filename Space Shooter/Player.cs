@@ -1,4 +1,6 @@
-﻿using SDL2;
+﻿// File: Player.cs
+
+using SDL2;
 using System.Collections.Generic;
 
 namespace Space_Shooter
@@ -47,7 +49,14 @@ namespace Space_Shooter
         {
             UpdateProjectiles();
             UpdateHearts();
-            CollisionManager.CheckCollisions(projectiles, enemies, this, game);
+            if (Health <= 0)
+            {
+                game.GameOver(); // Trigger game over if health is zero
+            }
+            else
+            {
+                CollisionManager.CheckCollisions(projectiles, enemies, this, game);
+            }
         }
 
         public void HandleInput(byte[] keys, IntPtr gameController)

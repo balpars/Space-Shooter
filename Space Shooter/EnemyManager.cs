@@ -1,4 +1,6 @@
-﻿using SDL2;
+﻿// File: EnemyManager.cs
+
+using SDL2;
 using System;
 using System.Collections.Generic;
 
@@ -91,7 +93,10 @@ namespace Space_Shooter
         {
             int objectX = random.Next(0, screenWidth - objectSize);
             int objectY = -objectSize;
-            enemies.Add(new BasicEnemy(objectX, -50, objectSize, renderer));
+            int speedX = random.Next(1, 4) * (random.Next(2) == 0 ? 1 : -1); // Random speed between -3 and 3
+            int speedY = random.Next(2, 5); // Random speed between 2 and 4
+
+            enemies.Add(new BasicEnemy(objectX, objectY, objectSize, renderer, speedX, speedY));
         }
 
         private void Shoot()

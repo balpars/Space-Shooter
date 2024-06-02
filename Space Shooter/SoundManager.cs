@@ -1,4 +1,6 @@
-﻿using SDL2;
+﻿// File: SoundManager.cs
+
+using SDL2;
 using System;
 
 namespace Space_Shooter
@@ -9,7 +11,7 @@ namespace Space_Shooter
         {
             if (SDL_mixer.Mix_OpenAudio(22050, SDL.AUDIO_S16SYS, 2, 4096) == -1)
             {
-               // Console.WriteLine("SDL_mixer could not initialize! SDL_mixer Error: " + SDL_mixer.Mix_GetError());
+                //Console.WriteLine($"SDL_mixer could not initialize! SDL_mixer Error: {SDL_mixer.Mix_GetError()}");
             }
         }
 
@@ -18,7 +20,7 @@ namespace Space_Shooter
             IntPtr sound = SDL_mixer.Mix_LoadWAV(path);
             if (sound == IntPtr.Zero)
             {
-                //Console.WriteLine("Failed to load sound effect! SDL_mixer Error: " + SDL_mixer.Mix_GetError());
+                //Console.WriteLine($"Failed to load sound effect! SDL_mixer Error: {SDL_mixer.Mix_GetError()}");
             }
             return sound;
         }

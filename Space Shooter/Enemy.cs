@@ -1,4 +1,6 @@
-﻿using SDL2;
+﻿// File: Enemy.cs
+
+using SDL2;
 using System;
 
 namespace Space_Shooter
@@ -14,9 +16,10 @@ namespace Space_Shooter
         private int points;
         private int hitLifetime; // Enemy hit lifetime in ticks
         private int hitLifetimeRemaining;
-        public int Speed { get; private set; } = 3;
+        public int SpeedX { get; private set; }
+        public int SpeedY { get; private set; }
 
-        public Enemy(int x, int y, int size, IntPtr renderer, int points, int hitLifetime = 200) : base(x, y, size, size)
+        public Enemy(int x, int y, int size, IntPtr renderer, int points, int speedX, int speedY, int hitLifetime = 200) : base(x, y, size, size)
         {
             this.renderer = renderer;
             this.points = points;
@@ -42,6 +45,9 @@ namespace Space_Shooter
             {
                 Console.WriteLine($"Unable to load hit texture {hitAssetPath}! SDL_Error: {SDL.SDL_GetError()}");
             }
+
+            SpeedX = speedX;
+            SpeedY = speedY;
         }
 
         public override void Update()
@@ -58,7 +64,7 @@ namespace Space_Shooter
             }
             else
             {
-                Move(0, Speed);
+                Move(SpeedX, SpeedY); // Move diagonally
             }
         }
 
@@ -106,7 +112,8 @@ namespace Space_Shooter
 
     class BasicEnemy : Enemy
     {
-        public BasicEnemy(int x, int y, int size, IntPtr renderer) : base(x, y, size, renderer, 100)
+        public BasicEnemy(int x, int y, int size, IntPtr renderer, int speedX, int speedY)
+            : base(x, y, size, renderer, 100, speedX, speedY)
         {
         }
     }
