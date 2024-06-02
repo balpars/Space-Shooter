@@ -8,6 +8,9 @@ namespace Space_Shooter
     {
         public static void CheckCollisions(List<Projectile> projectiles, List<Enemy> enemies, Player player, Game game)
         {
+            // Inside your Game class or wherever you handle game logic
+            GameOver gameOver = new GameOver();
+
             for (int i = projectiles.Count - 1; i >= 0; i--)
             {
                 var projectile = projectiles[i];
@@ -39,7 +42,16 @@ namespace Space_Shooter
                     game.AddCollisionEffect(effectX, effectY);
                     projectiles.RemoveAt(i);
                     game.PlayCollisionSound();
-                    // Add logic for what happens when player is hit (e.g., reduce health)
+                    if (player.Health > 0)
+                    {
+                        player.Health--;
+                    }
+                    else
+                    {
+                        gameOver.QuitGame();
+
+                    }
+
                 }
             }
 
@@ -58,6 +70,16 @@ namespace Space_Shooter
                         game.IncreaseScore(enemy.GetPoints());
                     }
                     game.PlayCollisionSound();
+                    if (player.Health > 0) 
+                    {
+                        player.Health--;
+
+                    }
+                    else
+                    {
+                        gameOver.QuitGame();
+
+                    }
                 }
             }
         }

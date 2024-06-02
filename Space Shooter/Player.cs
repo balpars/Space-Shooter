@@ -8,6 +8,7 @@ namespace Space_Shooter
         protected string assetPath;
         public int PositionX { get; private set; }
         public int PositionY { get; private set; }
+        public int Health;
         private int screenWidth;
         private int screenHeight;
         private List<Projectile> projectiles;
@@ -18,9 +19,11 @@ namespace Space_Shooter
         private int triangleHeight; // Triangle height for the player
         private int triangleBase; // Triangle base for the player
         private int speed;
+        public List<Heart> hearts;
 
 
-        public Player(IntPtr renderer, int w, int h, List<Enemy> enemies, Game game) : base((w - 100) / 2, (h - 100) / 2, 100, 100)
+
+        public Player(IntPtr renderer, int w, int h, List<Enemy> enemies, Game game, int health) : base((w - 100) / 2, (h - 100) / 2, 100, 100)
         {
             assetPath = "Assets/Player/player.png";
             this.PositionX = (w - 100) / 2;
@@ -30,15 +33,22 @@ namespace Space_Shooter
             this.enemies = enemies;
             this.game = game;
             this.speed = 5;
+            this.Health = health;
             projectiles = new List<Projectile>();
             lastShootTime = SDL.SDL_GetTicks();
             triangleHeight = 40; // Set the height of the triangle
             triangleBase = 20; // Set the base of the triangle
+            hearts = new List<Heart>();
+            for (int i = 0; i < health; i++)
+            {
+                hearts.Add(new Heart(1300+ (i * 30), 20, 70)); // Adjust the position and size as needed
+            }
         }
 
         public override void Update()
         {
             UpdateProjectiles();
+            UpdateHearts();
             CollisionManager.CheckCollisions(projectiles, enemies, this, game);
         }
 
@@ -133,12 +143,27 @@ namespace Space_Shooter
                 }
             }
         }
+        public void UpdateHearts()
+        {
+            hearts.Clear();
+            for (int i = 0; i < Health; i++)
+            {
+                hearts.Add(new Heart(1300 + (i * 30), 20, 70));
+            }
+        }
 
         public void RenderProjectiles(Renderer renderer)
         {
             foreach (var projectile in projectiles)
             {
                 projectile.Render(renderer);
+            }
+        }
+        public void RenderHearts(Renderer renderer)
+        {
+            foreach (var heart in hearts)
+            {
+                heart.Render(renderer);
             }
         }
 

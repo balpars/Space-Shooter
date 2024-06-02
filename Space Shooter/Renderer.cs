@@ -61,6 +61,16 @@ namespace Space_Shooter
 
                 SDL.SDL_RenderCopy(renderer, texture, ref srcRect, ref destRect);
             }
+            else if (obj is Heart heart && heart.GetAssetPath() != null)
+            {
+                IntPtr texture = TextureManager.LoadTexture(heart.GetAssetPath(), renderer);
+                SDL.SDL_Rect srcRect = new SDL.SDL_Rect { x = 0, y = 0, w = 100, h = 100 };
+                SDL.SDL_Rect destRect = obj.GetRect();
+                // TO-DO: Make w and h size of asset instead of hardcoding
+
+                SDL.SDL_RenderCopy(renderer, texture, ref srcRect, ref destRect);
+            }
+
             else // If There are no assets draw Red rectangles
             {
                 SDL.SDL_Rect rect = obj.GetRect();

@@ -26,6 +26,7 @@ namespace Space_Shooter
         private IntPtr font;
         private IntPtr scoreTexture;
         private SDL.SDL_Rect scoreRect;
+        private int playerHealth;
 
         public Game()
         {
@@ -38,6 +39,7 @@ namespace Space_Shooter
             gameState = GameState.TitleScreen;
             score = 0;
             scoreTexture = IntPtr.Zero;
+            playerHealth = 5;
         }
 
         public void Init(string title, int width, int height)
@@ -76,7 +78,7 @@ namespace Space_Shooter
 
             SDL.SDL_GetWindowSize(window, out windowWidth, out windowHeight);
             enemyList = new List<Enemy>();
-            player = new Player(renderer.RendererHandle, windowWidth, windowHeight, enemyList, this);
+            player = new Player(renderer.RendererHandle, windowWidth, windowHeight, enemyList, this, playerHealth);
             enemyManager = new EnemyManager(renderer.RendererHandle, windowWidth, windowHeight, enemyList, this);
 
             // Initialize parallax backgrounds
@@ -205,6 +207,7 @@ namespace Space_Shooter
                 }
                 renderer.Draw(player);
                 player.RenderProjectiles(renderer);
+                player.RenderHearts(renderer);
                 enemyManager.Render(renderer);
                 RenderCollisionEffects();
                 RenderScore();
