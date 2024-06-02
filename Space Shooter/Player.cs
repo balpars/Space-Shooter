@@ -17,6 +17,8 @@ namespace Space_Shooter
         private Game game;
         private int triangleHeight; // Triangle height for the player
         private int triangleBase; // Triangle base for the player
+        private int speed;
+
 
         public Player(IntPtr renderer, int w, int h, List<Enemy> enemies, Game game) : base((w - 100) / 2, (h - 100) / 2, 100, 100)
         {
@@ -27,6 +29,7 @@ namespace Space_Shooter
             this.screenHeight = h;
             this.enemies = enemies;
             this.game = game;
+            this.speed = 5;
             projectiles = new List<Projectile>();
             lastShootTime = SDL.SDL_GetTicks();
             triangleHeight = 40; // Set the height of the triangle
@@ -46,19 +49,19 @@ namespace Space_Shooter
 
             if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_UP] == 1)
             {
-                newY -= 5;
+                newY -= speed;
             }
             if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_DOWN] == 1)
             {
-                newY += 5;
+                newY += speed;
             }
             if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_LEFT] == 1)
             {
-                newX -= 5;
+                newX -= speed;
             }
             if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_RIGHT] == 1)
             {
-                newX += 5;
+                newX += speed;
             }
             if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_SPACE] == 1)
             {
@@ -74,19 +77,19 @@ namespace Space_Shooter
 
                 if (leftX < -DEAD_ZONE)
                 {
-                    newX -= 5;
+                    newX -= speed;
                 }
                 if (leftX > DEAD_ZONE)
                 {
-                    newX += 5;
+                    newX += speed;
                 }
                 if (leftY < -DEAD_ZONE)
                 {
-                    newY -= 5;
+                    newY -= speed;
                 }
                 if (leftY > DEAD_ZONE)
                 {
-                    newY += 5;
+                    newY += speed;
                 }
 
                 if (SDL.SDL_GameControllerGetButton(gameController, SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_X) == 1)
