@@ -16,12 +16,11 @@ namespace Space_Shooter
         private List<Projectile> projectiles;
         private List<Enemy> enemies;
         private uint lastShootTime;
-        private int shootInterval = 500; // milliseconds
+        private int shootInterval = 200; // milliseconds
         private Game game;
-        private int triangleHeight; // Triangle height for the player
-        private int triangleBase; // Triangle base for the player
         private int speed;
         public List<Heart> hearts;
+        private IntPtr shootSound;
 
         public Player(IntPtr renderer, int w, int h, List<Enemy> enemies, Game game, int health) : base((w - 100) / 2, (h - 100) / 2, 100, 100)
         {
@@ -36,13 +35,13 @@ namespace Space_Shooter
             this.Health = health;
             projectiles = new List<Projectile>();
             lastShootTime = SDL.SDL_GetTicks();
-            triangleHeight = 40; // Set the height of the triangle
-            triangleBase = 20; // Set the base of the triangle
             hearts = new List<Heart>();
             for (int i = 0; i < health; i++)
             {
                 hearts.Add(new Heart((screenWidth / 2) - (health * 15) + (i * 30), 20, 70)); // Adjust the position and size as needed
             }
+
+            shootSound = SoundManager.LoadSound("Assets/Sounds/shoot.wav");
         }
 
         public override void Update()
@@ -115,7 +114,7 @@ namespace Space_Shooter
                 }
             }
 
-            // Ekran sınırları içinde kalmayı sağla
+            // Ensure the player stays within the screen bounds
             if (newX < 0) newX = 0;
             if (newX + rect.w > screenWidth) newX = screenWidth - rect.w;
             if (newY < 0) newY = 0;
@@ -136,6 +135,7 @@ namespace Space_Shooter
                 int projectileY = PositionY; // Projectile starts at the top of the player
                 projectiles.Add(new BasicProjectile(projectileX, projectileY, 20, true, this)); // Add projectile to the list
                 lastShootTime = currentTime;
+                SoundManager.PlaySound(shootSound); // Play the shoot sound
             }
         }
 
@@ -186,15 +186,18 @@ namespace Space_Shooter
             return projectiles;
         }
 
-        public List<Point> GetVertices()
+        public SDL.SDL_Rect GetCollisionRect()
         {
-            List<Point> vertices = new List<Point>
+            // Return a smaller rectangle for collision detection
+            int collisionWidth = rect.w / 3;
+            int collisionHeight = rect.h / 3;
+            return new SDL.SDL_Rect
             {
-                new Point(PositionX + rect.w / 2, PositionY + rect.h / 2 - triangleHeight), // Top vertex
-                new Point(PositionX + rect.w / 2 - triangleBase / 2, PositionY + rect.h / 2 + triangleHeight), // Bottom left vertex
-                new Point(PositionX + rect.w / 2 + triangleBase / 2, PositionY + rect.h / 2 + triangleHeight) // Bottom right vertex
+                x = rect.x + (rect.w - collisionWidth) / 2 - 5,
+                y = rect.y + (rect.h - collisionHeight) / 2 + 5,
+                w = collisionWidth,
+                h = collisionHeight
             };
-            return vertices;
         }
     }
 }

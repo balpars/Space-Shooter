@@ -13,13 +13,22 @@ namespace Space_Shooter
             for (int i = projectiles.Count - 1; i >= 0; i--)
             {
                 var projectile = projectiles[i];
+                var projectileRect = projectile.GetRect();
+
                 for (int j = enemies.Count - 1; j >= 0; j--)
                 {
                     var enemy = enemies[j];
-                    if (projectile.Owner != enemy && IsColliding(projectile, enemy))
+                    var enemyRect = enemy.GetRect();
+
+                    // Skip collision check if the projectile owner is an enemy and the target is also an enemy
+                    if (projectile.Owner is Enemy && projectile.Owner != enemy && IsColliding(projectileRect, enemyRect))
                     {
-                        int effectX = projectile.GetRect().x + projectile.GetRect().w / 2;
-                        int effectY = projectile.GetRect().y + projectile.GetRect().h / 2;
+                        continue;
+                    }
+                    if (projectile.Owner != enemy && IsColliding(projectileRect, enemyRect))
+                    {
+                        int effectX = projectileRect.x + projectileRect.w / 2;
+                        int effectY = projectileRect.y + projectileRect.h / 2;
                         game.AddCollisionEffect(effectX, effectY);
                         projectiles.RemoveAt(i);
                         if (!enemy.IsHit())
@@ -32,10 +41,10 @@ namespace Space_Shooter
                     }
                 }
 
-                if (projectile.Owner is Enemy && IsColliding(projectile, player))
+                if (projectile.Owner is Enemy && IsColliding(projectileRect, player.GetCollisionRect()))
                 {
-                    int effectX = projectile.GetRect().x + projectile.GetRect().w / 2;
-                    int effectY = projectile.GetRect().y + projectile.GetRect().h / 2;
+                    int effectX = projectileRect.x + projectileRect.w / 2 - 5;
+                    int effectY = projectileRect.y + projectileRect.h / 2;
                     game.AddCollisionEffect(effectX, effectY);
                     projectiles.RemoveAt(i);
                     game.PlayCollisionSound();
@@ -53,10 +62,11 @@ namespace Space_Shooter
             for (int i = enemies.Count - 1; i >= 0; i--)
             {
                 var enemy = enemies[i];
-                if (IsColliding(player, enemy))
+                var enemyRect = enemy.GetRect();
+                if (IsColliding(player.GetCollisionRect(), enemyRect))
                 {
-                    int effectX = enemy.GetRect().x + enemy.GetRect().w / 2;
-                    int effectY = enemy.GetRect().y + enemy.GetRect().h / 2;
+                    int effectX = enemyRect.x + enemyRect.w / 2;
+                    int effectY = enemyRect.y + enemyRect.h / 2;
                     game.AddCollisionEffect(effectX, effectY);
                     if (!enemy.IsHit())
                     {
@@ -76,11 +86,8 @@ namespace Space_Shooter
             }
         }
 
-        public static bool IsColliding(GameObject object1, GameObject object2)
+        public static bool IsColliding(SDL.SDL_Rect rect1, SDL.SDL_Rect rect2)
         {
-            var rect1 = object1.GetRect();
-            var rect2 = object2.GetRect();
-
             return rect1.x < rect2.x + rect2.w &&
                    rect1.x + rect1.w > rect2.x &&
                    rect1.y < rect2.y + rect2.h &&
