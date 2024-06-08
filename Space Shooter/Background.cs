@@ -12,6 +12,7 @@ namespace Space_Shooter
         private int speed;
         private int screenWidth;
         private int screenHeight;
+        private bool isFastMode; // Track if fast mode is enabled
 
         public Background(string assetPath, IntPtr renderer, int speed, int screenWidth, int screenHeight)
         {
@@ -27,13 +28,15 @@ namespace Space_Shooter
             srcRect = new SDL.SDL_Rect { x = 0, y = 0, w = screenWidth, h = screenHeight };
             destRect1 = new SDL.SDL_Rect { x = 0, y = 0, w = screenWidth, h = screenHeight };
             destRect2 = new SDL.SDL_Rect { x = 0, y = -screenHeight, w = screenWidth, h = screenHeight };
+            isFastMode = false;
         }
 
         public void Update()
         {
             // Move the backgrounds down by speed
-            destRect1.y += speed;
-            destRect2.y += speed;
+            int actualSpeed = isFastMode ? speed * 2 : speed; // Double the speed if in fast mode
+            destRect1.y += actualSpeed;
+            destRect2.y += actualSpeed;
 
             // If the first background moved fully below the screen, reset its position
             if (destRect1.y >= screenHeight)
@@ -52,6 +55,11 @@ namespace Space_Shooter
         {
             SDL.SDL_RenderCopy(renderer, texture, ref srcRect, ref destRect1);
             SDL.SDL_RenderCopy(renderer, texture, ref srcRect, ref destRect2);
+        }
+
+        public void SetFastMode(bool isFast)
+        {
+            isFastMode = isFast;
         }
 
         public void Cleanup()

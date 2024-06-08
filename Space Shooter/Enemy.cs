@@ -16,16 +16,27 @@ namespace Space_Shooter
         private int points;
         private int hitLifetime; // Enemy hit lifetime in ticks
         private int hitLifetimeRemaining;
+        private bool isFlashing;
+        private int flashCount;
+        private uint lastFlashTime;
+        private uint flashInterval;
+        private bool isVisible;
+
         public int SpeedX { get; private set; }
         public int SpeedY { get; private set; }
 
-        public Enemy(int x, int y, int size, IntPtr renderer, int points, int speedX, int speedY, int hitLifetime = 200) : base(x, y, size, size)
+        public Enemy(int x, int y, int size, IntPtr renderer, int points, int speedX, int speedY, int hitLifetime = 1000) : base(x, y, size, size)
         {
             this.renderer = renderer;
             this.points = points;
             isHit = false;
             this.hitLifetime = hitLifetime;
             this.hitLifetimeRemaining = hitLifetime;
+            isFlashing = false;
+            flashCount = 0;
+            lastFlashTime = 0;
+            flashInterval = 500; // milliseconds
+            isVisible = true;
 
             if (SDL_image.IMG_Init(SDL_image.IMG_InitFlags.IMG_INIT_PNG) == 0)
             {
@@ -55,10 +66,24 @@ namespace Space_Shooter
             if (isHit)
             {
                 hitLifetimeRemaining -= 16; // Assuming Update is called every ~16ms (60 FPS)
+                uint currentTime = SDL.SDL_GetTicks();
+
+                if (currentTime > lastFlashTime + flashInterval)
+                {
+                    isVisible = !isVisible;
+                    flashCount++;
+                    lastFlashTime = currentTime;
+                }
+
+                if (flashCount >= 6) // Flash three times (6 visibility changes)
+                {
+                    isVisible = false; // Finally hide the enemy
+                    isFlashing = false;
+                    hitLifetimeRemaining = 0;
+                }
+
                 if (hitLifetimeRemaining <= 0)
                 {
-                    // Remove the enemy when the hit lifetime expires
-                    isHit = false; // Mark for removal
                     rect.x = -1000; // Move it out of screen to ensure it is not rendered
                 }
             }
@@ -70,7 +95,7 @@ namespace Space_Shooter
 
         public override void Render(IntPtr renderer)
         {
-            if (hitLifetimeRemaining > 0)
+            if (isVisible)
             {
                 IntPtr currentTexture = isHit ? hitTexture : texture;
                 SDL.SDL_RenderCopy(renderer, currentTexture, IntPtr.Zero, ref rect);
@@ -80,6 +105,9 @@ namespace Space_Shooter
         public void OnHit()
         {
             isHit = true;
+            isFlashing = true;
+            flashCount = 0;
+            lastFlashTime = SDL.SDL_GetTicks();
             hitLifetimeRemaining = hitLifetime; // Reset the lifetime when hit
         }
 

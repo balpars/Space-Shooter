@@ -5,12 +5,12 @@ namespace Space_Shooter
     public class Projectile : GameObject
     {
         protected string? assetPath;
-        public int Speed { get; private set; } = 5;
+        public int Speed { get; private set; }
         public GameObject Owner { get; private set; }
 
         public Projectile(int x, int y, int size, bool isUpwards, GameObject owner) : base(x, y, size, size)
         {
-            if (isUpwards) { Speed *= -1; }
+            Speed = isUpwards ? -5 : 5; // Default speed
             this.Owner = owner;
         }
 
@@ -27,6 +27,11 @@ namespace Space_Shooter
         public void Render(Renderer renderer)
         {
             renderer.Draw(this);
+        }
+
+        public void SetSpeed(int newSpeed)
+        {
+            Speed = newSpeed;
         }
     }
 

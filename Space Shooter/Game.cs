@@ -11,7 +11,7 @@ namespace Space_Shooter
     {
         private bool isRunning;
         private IntPtr window;
-        private Renderer renderer;
+        public Renderer renderer;
         private InputHandler inputHandler;
         private Player player;
         private EnemyManager enemyManager;
@@ -31,7 +31,11 @@ namespace Space_Shooter
         private SDL.SDL_Rect scoreRect;
         private int playerHealth;
         private GameOver gameOver;
-        private IntPtr gameOverSound; // Add this line
+        private IntPtr gameOverSound;
+        private bool scoreTransformed;
+        private uint scoreTransformStartTime;
+        private uint scoreTransformDuration = 500; // Duration in milliseconds
+        private bool isFastMode; // To track if fast mode is activated
 
         public Game()
         {
@@ -46,6 +50,9 @@ namespace Space_Shooter
             score = 0;
             scoreTexture = IntPtr.Zero;
             playerHealth = 5;
+            scoreTransformed = false;
+            scoreTransformStartTime = 0;
+            isFastMode = false;
         }
 
         public void Init(string title, int width, int height)
@@ -99,7 +106,7 @@ namespace Space_Shooter
             }
 
             collisionSound = SoundManager.LoadSound("Assets/Sounds/collision.wav");
-            gameOverSound = SoundManager.LoadSound("Assets/Sounds/game_over.wav"); // Add this line
+            gameOverSound = SoundManager.LoadSound("Assets/Sounds/game_over.wav");
 
             if (SDL.SDL_NumJoysticks() > 0)
             {
@@ -197,10 +204,28 @@ namespace Space_Shooter
                 {
                     bg.Update();
                 }
+
+                // Activate fast mode if score > 1000 and not already activated
+                if (score > 1000 && !isFastMode)
+                {
+                    isFastMode = true;
+                    enemyManager.SetFastMode(true);
+                    foreach (var bg in backgrounds)
+                    {
+                        bg.SetFastMode(true);
+                    }
+                }
+
+                // Handle score transformation timing
+                if (scoreTransformed && SDL.SDL_GetTicks() - scoreTransformStartTime > scoreTransformDuration)
+                {
+                    scoreTransformed = false;
+                    UpdateScoreTexture();
+                }
             }
         }
 
-        private void Render()
+        public void Render()
         {
             renderer.Clear();
 
@@ -231,7 +256,7 @@ namespace Space_Shooter
 
         private void UpdateScoreTexture()
         {
-            SDL.SDL_Color color = new SDL.SDL_Color { r = 255, g = 255, b = 255, a = 255 };
+            SDL.SDL_Color color = scoreTransformed ? new SDL.SDL_Color { r = 255, g = 0, b = 0, a = 255 } : new SDL.SDL_Color { r = 255, g = 255, b = 255, a = 255 };
             IntPtr surface = SDL_ttf.TTF_RenderText_Solid(font, $"Score: {score}", color);
 
             if (surface == IntPtr.Zero)
@@ -254,8 +279,8 @@ namespace Space_Shooter
             {
                 x = 10,
                 y = 10,
-                w = sdlSurface.w,
-                h = sdlSurface.h
+                w = scoreTransformed ? sdlSurface.w * 2 : sdlSurface.w,
+                h = scoreTransformed ? sdlSurface.h * 2 : sdlSurface.h
             };
 
             SDL.SDL_FreeSurface(surface);
@@ -275,7 +300,14 @@ namespace Space_Shooter
         public void IncreaseScore(int points)
         {
             score += points;
+            scoreTransformed = true;
+            scoreTransformStartTime = SDL.SDL_GetTicks();
             UpdateScoreTexture();
+        }
+
+        public int GetScore()
+        {
+            return score;
         }
 
         private void UpdateCollisionEffects()
@@ -314,7 +346,7 @@ namespace Space_Shooter
 
             SDL_mixer.Mix_FreeMusic(backgroundMusic);
             SDL_mixer.Mix_FreeChunk(collisionSound);
-            SDL_mixer.Mix_FreeChunk(gameOverSound); // Add this line
+            SDL_mixer.Mix_FreeChunk(gameOverSound);
             SoundManager.Cleanup();
 
             if (gameController != IntPtr.Zero)
@@ -345,7 +377,7 @@ namespace Space_Shooter
         public void GameOver()
         {
             gameState = GameState.GameOver;
-            SoundManager.PlaySound(gameOverSound); // Add this line
+            SoundManager.PlaySound(gameOverSound);
         }
 
         private void RestartGame()

@@ -7,7 +7,7 @@ namespace Space_Shooter
 {
     public class Player : GameObject
     {
-        protected string assetPath;
+        protected string[] assetPaths;
         public int PositionX { get; private set; }
         public int PositionY { get; private set; }
         public int Health;
@@ -21,10 +21,18 @@ namespace Space_Shooter
         private int speed;
         public List<Heart> hearts;
         private IntPtr shootSound;
+        private Dictionary<int, IntPtr> textures; // Store textures based on health
+        private IntPtr texture; // Current texture
 
         public Player(IntPtr renderer, int w, int h, List<Enemy> enemies, Game game, int health) : base((w - 100) / 2, (h - 100) / 2, 100, 100)
         {
-            assetPath = "Assets/Player/player.png";
+            assetPaths = new string[] {
+                "Assets/Player/player_1.png",
+                "Assets/Player/player_2.png",
+                "Assets/Player/player_3.png",
+                "Assets/Player/player_4.png"
+            };
+
             this.PositionX = (w - 100) / 2;
             this.PositionY = (h - 100) / 2;
             this.screenWidth = w;
@@ -42,6 +50,17 @@ namespace Space_Shooter
             }
 
             shootSound = SoundManager.LoadSound("Assets/Sounds/shoot.wav");
+
+            // Load textures
+            textures = new Dictionary<int, IntPtr>();
+            for (int i = 0; i < assetPaths.Length; i++)
+            {
+                IntPtr texture = SDL_image.IMG_LoadTexture(renderer, assetPaths[i]);
+                textures.Add(i + 1, texture);
+            }
+
+            // Set initial texture
+            SetTexture(renderer);
         }
 
         public override void Update()
@@ -131,9 +150,30 @@ namespace Space_Shooter
             uint currentTime = SDL.SDL_GetTicks();
             if (currentTime > lastShootTime + shootInterval)
             {
-                int projectileX = PositionX + rect.w / 2 - 5; // Adjust the x position to center the projectile
+                int projectileXCenter = PositionX + rect.w / 2 - 5; // Adjust the x position to center the projectile
                 int projectileY = PositionY; // Projectile starts at the top of the player
-                projectiles.Add(new BasicProjectile(projectileX, projectileY, 20, true, this)); // Add projectile to the list
+
+                // Single projectile
+                var centerProjectile = new BasicProjectile(projectileXCenter, projectileY, 20, true, this);
+                centerProjectile.SetSpeed(-10); // Set speed to move upwards
+                projectiles.Add(centerProjectile);
+
+                // Additional projectiles if score > 1000
+                if (game.GetScore() > 1000)
+                {
+                    int projectileXLeft = PositionX + rect.w / 4 - 5; // Adjust the x position for the left projectile
+                    int projectileXRight = PositionX + 3 * rect.w / 4 - 5; // Adjust the x position for the right projectile
+
+                    var leftProjectile = new BasicProjectile(projectileXLeft, projectileY, 20, true, this);
+                    var rightProjectile = new BasicProjectile(projectileXRight, projectileY, 20, true, this);
+
+                    leftProjectile.SetSpeed(-10); // Set speed to move upwards
+                    rightProjectile.SetSpeed(-10); // Set speed to move upwards
+
+                    projectiles.Add(leftProjectile);
+                    projectiles.Add(rightProjectile);
+                }
+
                 lastShootTime = currentTime;
                 SoundManager.PlaySound(shootSound); // Play the shoot sound
             }
@@ -178,7 +218,14 @@ namespace Space_Shooter
 
         public string? GetAssetPath()
         {
-            return assetPath;
+            int assetIndex = Health switch
+            {
+                5 => 3, // player_4.png
+                4 => 2, // player_3.png
+                3 => 1, // player_2.png
+                _ => 0  // player_1.png for 2 and 1 health
+            };
+            return assetPaths[assetIndex]; // Return the current asset path based on health
         }
 
         public List<Projectile> GetProjectiles()
@@ -198,6 +245,32 @@ namespace Space_Shooter
                 w = collisionWidth,
                 h = collisionHeight
             };
+        }
+
+        public void SetTexture(IntPtr renderer)
+        {
+            int assetIndex = Health switch
+            {
+                5 => 4, // player_4.png
+                4 => 3, // player_3.png
+                3 => 2, // player_2.png
+                _ => 1  // player_1.png for 2 and 1 health
+            };
+            if (textures.ContainsKey(assetIndex))
+            {
+                SDL.SDL_DestroyTexture(texture); // Destroy the previous texture
+                texture = textures[assetIndex];
+            }
+        }
+
+        public void UpdateHealth(int amount)
+        {
+            Health += amount;
+            if (Health < 0)
+            {
+                Health = 0;
+            }
+            SetTexture(game.renderer.RendererHandle); // Update the texture based on the new health
         }
     }
 }

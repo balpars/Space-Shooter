@@ -25,6 +25,8 @@ namespace Space_Shooter
         private uint lastSpawnTime;
         private int spawnInterval = 2000;
 
+        private bool isFastMode;
+
         public EnemyManager(IntPtr renderer, int screenWidth, int screenHeight, List<Enemy> enemies, Game game)
         {
             this.renderer = renderer;
@@ -37,6 +39,7 @@ namespace Space_Shooter
             CreateEnemy();
             lastShootTime = SDL.SDL_GetTicks();
             lastSpawnTime = SDL.SDL_GetTicks();
+            isFastMode = false;
         }
 
         public void Update(Player player)
@@ -94,7 +97,7 @@ namespace Space_Shooter
             int objectX = random.Next(0, screenWidth - objectSize);
             int objectY = -objectSize;
             int speedX = random.Next(1, 4) * (random.Next(2) == 0 ? 1 : -1); // Random speed between -3 and 3
-            int speedY = random.Next(2, 5); // Random speed between 2 and 4
+            int speedY = random.Next(isFastMode ? 5 : 2, isFastMode ? 8 : 5); // Increase speed in fast mode
 
             enemies.Add(new BasicEnemy(objectX, objectY, objectSize, renderer, speedX, speedY));
         }
@@ -107,7 +110,12 @@ namespace Space_Shooter
                 {
                     int projectileX = enemy.GetRect().x + objectSize / 2 - 23;
                     int projectileY = enemy.GetRect().y + objectSize - 5;
-                    projectiles.Add(new BasicProjectile(projectileX, projectileY, projectileSize, false, enemy));
+                    var projectile = new BasicProjectile(projectileX, projectileY, projectileSize, false, enemy);
+                    if (isFastMode)
+                    {
+                        projectile.SetSpeed(10); // Increase speed in fast mode
+                    }
+                    projectiles.Add(projectile);
                 }
             }
         }
@@ -115,6 +123,12 @@ namespace Space_Shooter
         public List<Enemy> GetEnemies()
         {
             return this.enemies;
+        }
+
+        public void SetFastMode(bool isFast)
+        {
+            isFastMode = isFast;
+            spawnInterval = isFast ? 1000 : 2000; // Decrease spawn interval in fast mode
         }
     }
 }

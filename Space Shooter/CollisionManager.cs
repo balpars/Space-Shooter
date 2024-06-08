@@ -50,7 +50,7 @@ namespace Space_Shooter
                     game.PlayCollisionSound();
                     if (player.Health > 0)
                     {
-                        player.Health--;
+                        player.UpdateHealth(-1); // Reduce health by 1
                     }
                     else
                     {
@@ -76,7 +76,7 @@ namespace Space_Shooter
                     game.PlayCollisionSound();
                     if (player.Health > 0)
                     {
-                        player.Health--;
+                        player.UpdateHealth(-1); // Reduce health by 1
                     }
                     else
                     {
