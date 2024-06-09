@@ -86,6 +86,64 @@ namespace Space_Shooter
             }
         }
 
+        public static void CheckRockCollisions(List<Rock> rocks, Player player, Game game)
+        {
+            for (int i = rocks.Count - 1; i >= 0; i--)
+            {
+                var rock = rocks[i];
+                var rockRect = rock.GetRect();
+
+                if (IsColliding(rockRect, player.GetCollisionRect()))
+                {
+                    int effectX = rockRect.x + rockRect.w / 2;
+                    int effectY = rockRect.y + rockRect.h / 2;
+                    game.AddCollisionEffect(effectX, effectY);
+                    rocks.RemoveAt(i);
+                    game.PlayCollisionSound();
+                    if (player.Health > 0)
+                    {
+                        player.UpdateHealth(-1); // Reduce health by 1
+                    }
+                    else
+                    {
+                        game.GameOver();
+                    }
+                }
+            }
+        }
+
+        public static void CheckHealthBoostCollisions(List<HealthBoost> healthBoosts, Player player, Game game)
+        {
+            for (int i = healthBoosts.Count - 1; i >= 0; i--)
+            {
+                var healthBoost = healthBoosts[i];
+                var healthBoostRect = healthBoost.GetRect();
+
+                if (IsColliding(healthBoostRect, player.GetCollisionRect()))
+                {
+                    healthBoosts.RemoveAt(i);
+                    game.PlayHealthBoostSound(); // Play health boost sound
+                    player.UpdateHealth(1); // Increase health by 1
+                }
+            }
+        }
+
+        public static void CheckBulletBoostCollisions(List<BulletBoost> bulletBoosts, Player player, Game game)
+        {
+            for (int i = bulletBoosts.Count - 1; i >= 0; i--)
+            {
+                var bulletBoost = bulletBoosts[i];
+                var bulletBoostRect = bulletBoost.GetRect();
+
+                if (IsColliding(bulletBoostRect, player.GetCollisionRect()))
+                {
+                    bulletBoosts.RemoveAt(i);
+                    player.ActivateTripleShot(10000); // Activate triple shot for 10 seconds
+                    player.PlayPowerUpSound(); // Play power-up sound
+                }
+            }
+        }
+
         public static bool IsColliding(SDL.SDL_Rect rect1, SDL.SDL_Rect rect2)
         {
             return rect1.x < rect2.x + rect2.w &&

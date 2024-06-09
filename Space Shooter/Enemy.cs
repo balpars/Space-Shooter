@@ -21,11 +21,12 @@ namespace Space_Shooter
         private uint lastFlashTime;
         private uint flashInterval;
         private bool isVisible;
+        private int screenWidth;
 
         public int SpeedX { get; private set; }
         public int SpeedY { get; private set; }
 
-        public Enemy(int x, int y, int size, IntPtr renderer, int points, int speedX, int speedY, int hitLifetime = 1000) : base(x, y, size, size)
+        public Enemy(int x, int y, int size, IntPtr renderer, int points, int speedX, int speedY, int screenWidth, int hitLifetime = 1000) : base(x, y, size, size)
         {
             this.renderer = renderer;
             this.points = points;
@@ -37,6 +38,7 @@ namespace Space_Shooter
             lastFlashTime = 0;
             flashInterval = 500; // milliseconds
             isVisible = true;
+            this.screenWidth = screenWidth;
 
             if (SDL_image.IMG_Init(SDL_image.IMG_InitFlags.IMG_INIT_PNG) == 0)
             {
@@ -90,6 +92,12 @@ namespace Space_Shooter
             else
             {
                 Move(SpeedX, SpeedY); // Move diagonally
+
+                // Ensure the enemy stays within the screen bounds horizontally
+                if (rect.x < 0 || rect.x + rect.w > screenWidth)
+                {
+                    SpeedX = -SpeedX; // Reverse direction
+                }
             }
         }
 
@@ -140,8 +148,8 @@ namespace Space_Shooter
 
     class BasicEnemy : Enemy
     {
-        public BasicEnemy(int x, int y, int size, IntPtr renderer, int speedX, int speedY)
-            : base(x, y, size, renderer, 100, speedX, speedY)
+        public BasicEnemy(int x, int y, int size, IntPtr renderer, int speedX, int speedY, int screenWidth)
+            : base(x, y, size, renderer, 100, speedX, speedY, screenWidth)
         {
         }
     }

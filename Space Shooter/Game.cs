@@ -24,6 +24,7 @@ namespace Space_Shooter
         private GameState gameState;
         private IntPtr backgroundMusic;
         private IntPtr collisionSound;
+        private IntPtr healthBoostSound; // Add this line
         private IntPtr gameController;
         private int score;
         private IntPtr font;
@@ -106,6 +107,7 @@ namespace Space_Shooter
             }
 
             collisionSound = SoundManager.LoadSound("Assets/Sounds/collision.wav");
+            healthBoostSound = SoundManager.LoadSound("Assets/Sounds/health_boost.wav"); // Add this line
             gameOverSound = SoundManager.LoadSound("Assets/Sounds/game_over.wav");
 
             if (SDL.SDL_NumJoysticks() > 0)
@@ -172,7 +174,8 @@ namespace Space_Shooter
                 }
                 else if (e.type == SDL.SDL_EventType.SDL_CONTROLLERBUTTONDOWN)
                 {
-                    if (e.cbutton.button == (byte)SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_START)
+                    if (e.cbutton.button == (byte)SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_START ||
+                        e.cbutton.button == (byte)SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_X)
                     {
                         if (gameState == GameState.TitleScreen)
                         {
@@ -346,6 +349,7 @@ namespace Space_Shooter
 
             SDL_mixer.Mix_FreeMusic(backgroundMusic);
             SDL_mixer.Mix_FreeChunk(collisionSound);
+            SDL_mixer.Mix_FreeChunk(healthBoostSound); // Add this line
             SDL_mixer.Mix_FreeChunk(gameOverSound);
             SoundManager.Cleanup();
 
@@ -367,6 +371,11 @@ namespace Space_Shooter
         public void PlayCollisionSound()
         {
             SoundManager.PlaySound(collisionSound);
+        }
+
+        public void PlayHealthBoostSound() // Add this method
+        {
+            SoundManager.PlaySound(healthBoostSound);
         }
 
         public void AddCollisionEffect(int x, int y)

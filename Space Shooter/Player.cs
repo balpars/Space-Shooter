@@ -10,7 +10,7 @@ namespace Space_Shooter
         protected string[] assetPaths;
         public int PositionX { get; private set; }
         public int PositionY { get; private set; }
-        public int Health;
+        public int Health { get; private set; } // Health property with private setter
         private int screenWidth;
         private int screenHeight;
         private List<Projectile> projectiles;
@@ -21,8 +21,12 @@ namespace Space_Shooter
         private int speed;
         public List<Heart> hearts;
         private IntPtr shootSound;
+        private IntPtr powerUpSound; // Sound for power-up collision
+        private IntPtr healthBoostSound; // Sound for health boost collision
         private Dictionary<int, IntPtr> textures; // Store textures based on health
         private IntPtr texture; // Current texture
+        private bool tripleShotActive;
+        private uint tripleShotEndTime;
 
         public Player(IntPtr renderer, int w, int h, List<Enemy> enemies, Game game, int health) : base((w - 100) / 2, (h - 100) / 2, 100, 100)
         {
@@ -50,6 +54,8 @@ namespace Space_Shooter
             }
 
             shootSound = SoundManager.LoadSound("Assets/Sounds/shoot.wav");
+            powerUpSound = SoundManager.LoadSound("Assets/Sounds/power_up.wav"); // Load power-up sound
+            healthBoostSound = SoundManager.LoadSound("Assets/Sounds/health_boost.wav"); // Load health boost sound
 
             // Load textures
             textures = new Dictionary<int, IntPtr>();
@@ -61,6 +67,8 @@ namespace Space_Shooter
 
             // Set initial texture
             SetTexture(renderer);
+
+            tripleShotActive = false; // Initialize triple shot mode as inactive
         }
 
         public override void Update()
@@ -74,6 +82,12 @@ namespace Space_Shooter
             else
             {
                 CollisionManager.CheckCollisions(projectiles, enemies, this, game);
+            }
+
+            // Check if triple shot duration has ended
+            if (tripleShotActive && SDL.SDL_GetTicks() > tripleShotEndTime)
+            {
+                tripleShotActive = false;
             }
         }
 
@@ -158,11 +172,11 @@ namespace Space_Shooter
                 centerProjectile.SetSpeed(-10); // Set speed to move upwards
                 projectiles.Add(centerProjectile);
 
-                // Additional projectiles if score > 1000
-                if (game.GetScore() > 1000)
+                // Triple shot if active
+                if (tripleShotActive)
                 {
-                    int projectileXLeft = PositionX + rect.w / 4 - 5; // Adjust the x position for the left projectile
-                    int projectileXRight = PositionX + 3 * rect.w / 4 - 5; // Adjust the x position for the right projectile
+                    int projectileXLeft = projectileXCenter - 20; // Adjust the x position for the left projectile
+                    int projectileXRight = projectileXCenter + 20; // Adjust the x position for the right projectile
 
                     var leftProjectile = new BasicProjectile(projectileXLeft, projectileY, 20, true, this);
                     var rightProjectile = new BasicProjectile(projectileXRight, projectileY, 20, true, this);
@@ -266,11 +280,32 @@ namespace Space_Shooter
         public void UpdateHealth(int amount)
         {
             Health += amount;
-            if (Health < 0)
+            if (Health > 5)
+            {
+                Health = 5; // Cap health at 5
+            }
+            else if (Health < 0)
             {
                 Health = 0;
             }
             SetTexture(game.renderer.RendererHandle); // Update the texture based on the new health
+            UpdateHearts(); // Update hearts display
+        }
+
+        public void ActivateTripleShot(uint duration)
+        {
+            tripleShotActive = true;
+            tripleShotEndTime = SDL.SDL_GetTicks() + duration;
+        }
+
+        public void PlayPowerUpSound()
+        {
+            SoundManager.PlaySound(powerUpSound);
+        }
+
+        public void PlayHealthBoostSound()
+        {
+            SoundManager.PlaySound(healthBoostSound);
         }
     }
 }
