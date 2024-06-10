@@ -27,8 +27,8 @@ namespace Space_Shooter
                     }
                     if (projectile.Owner != enemy && IsColliding(projectileRect, enemyRect))
                     {
-                        int effectX = projectileRect.x + projectileRect.w / 2;
-                        int effectY = projectileRect.y + projectileRect.h / 2;
+                        int effectX = projectileRect.x - projectileRect.w / 2;
+                        int effectY = projectileRect.y - projectileRect.h / 2;
                         game.AddCollisionEffect(effectX, effectY);
                         projectiles.RemoveAt(i);
                         if (!enemy.IsHit())
