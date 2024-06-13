@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
 using SDL2;
 
@@ -27,9 +28,13 @@ namespace Space_Shooter
         private IntPtr healthBoostSound; // Add this line
         private IntPtr gameController;
         private int score;
+        private int highScore;
+        private string highScoreFile = "highscore.txt"; // High score file
         private IntPtr font;
         private IntPtr scoreTexture;
         private SDL.SDL_Rect scoreRect;
+        private SDL.SDL_Rect highScoreRect; // High score rect
+        private IntPtr highScoreTexture; // High score texture
         private int playerHealth;
         private GameOver gameOver;
         private IntPtr gameOverSound;
@@ -50,6 +55,7 @@ namespace Space_Shooter
             gameState = GameState.TitleScreen;
             score = 0;
             scoreTexture = IntPtr.Zero;
+            highScoreTexture = IntPtr.Zero; // Initialize high score texture
             playerHealth = 5;
             scoreTransformed = false;
             scoreTransformStartTime = 0;
@@ -127,7 +133,10 @@ namespace Space_Shooter
                 Console.WriteLine($"Failed to load font! SDL_ttf Error: {SDL.SDL_GetError()}");
             }
 
+            LoadHighScore(); // Load high score from file
+
             UpdateScoreTexture();
+            UpdateHighScoreTexture(); // Update high score texture
 
             gameOver = new GameOver("Assets/GameOver/game_over.png", renderer.RendererHandle, windowWidth, windowHeight);
         }
@@ -142,6 +151,7 @@ namespace Space_Shooter
                 SDL.SDL_Delay(16); // ~60 FPS
             }
 
+            SaveHighScore(); // Save high score to file
             Cleanup();
         }
 
@@ -225,6 +235,13 @@ namespace Space_Shooter
                     scoreTransformed = false;
                     UpdateScoreTexture();
                 }
+
+                // Update high score if needed
+                if (score > highScore)
+                {
+                    highScore = score;
+                    UpdateHighScoreTexture();
+                }
             }
         }
 
@@ -248,6 +265,7 @@ namespace Space_Shooter
                 enemyManager.Render(renderer);
                 RenderCollisionEffects();
                 RenderScore();
+                RenderHighScore(); // Render high score
             }
             else if (gameState == GameState.GameOver)
             {
@@ -295,9 +313,52 @@ namespace Space_Shooter
             scoreTexture = texture;
         }
 
+        private void UpdateHighScoreTexture()
+        {
+            SDL.SDL_Color color = new SDL.SDL_Color { r = 255, g = 255, b = 0, a = 255 };
+            IntPtr surface = SDL_ttf.TTF_RenderText_Solid(font, $"High Score: {highScore}", color);
+
+            if (surface == IntPtr.Zero)
+            {
+                Console.WriteLine($"Failed to create surface for high score text! SDL_ttf Error: {SDL.SDL_GetError()}");
+                return;
+            }
+
+            IntPtr texture = SDL.SDL_CreateTextureFromSurface(renderer.RendererHandle, surface);
+            if (texture == IntPtr.Zero)
+            {
+                Console.WriteLine($"Failed to create texture for high score text! SDL_Error: {SDL.SDL_GetError()}");
+                SDL.SDL_FreeSurface(surface);
+                return;
+            }
+
+            SDL.SDL_Surface sdlSurface = Marshal.PtrToStructure<SDL.SDL_Surface>(surface);
+
+            highScoreRect = new SDL.SDL_Rect
+            {
+                x = windowWidth - sdlSurface.w - 10,
+                y = 10,
+                w = sdlSurface.w,
+                h = sdlSurface.h
+            };
+
+            SDL.SDL_FreeSurface(surface);
+
+            if (highScoreTexture != IntPtr.Zero)
+            {
+                SDL.SDL_DestroyTexture(highScoreTexture);
+            }
+            highScoreTexture = texture;
+        }
+
         private void RenderScore()
         {
             SDL.SDL_RenderCopy(renderer.RendererHandle, scoreTexture, IntPtr.Zero, ref scoreRect);
+        }
+
+        private void RenderHighScore()
+        {
+            SDL.SDL_RenderCopy(renderer.RendererHandle, highScoreTexture, IntPtr.Zero, ref highScoreRect);
         }
 
         public void IncreaseScore(int points)
@@ -311,6 +372,24 @@ namespace Space_Shooter
         public int GetScore()
         {
             return score;
+        }
+
+        private void LoadHighScore()
+        {
+            if (File.Exists(highScoreFile))
+            {
+                string fileContent = File.ReadAllText(highScoreFile);
+                int.TryParse(fileContent, out highScore);
+            }
+            else
+            {
+                highScore = 0;
+            }
+        }
+
+        private void SaveHighScore()
+        {
+            File.WriteAllText(highScoreFile, highScore.ToString());
         }
 
         private void UpdateCollisionEffects()
@@ -359,6 +438,7 @@ namespace Space_Shooter
             }
 
             SDL.SDL_DestroyTexture(scoreTexture);
+            SDL.SDL_DestroyTexture(highScoreTexture); // Destroy high score texture
             SDL_ttf.TTF_CloseFont(font);
 
             if (window != IntPtr.Zero)
