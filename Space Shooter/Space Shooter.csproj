@@ -33,6 +33,9 @@
     <None Update="Assets\Effects\collision.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Assets\Enemy\advanced_enemy.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Assets\Enemy\hit_enemy.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -59,6 +62,9 @@
     </None>
     <None Update="Assets\Player\player_4.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\Projectiles\advanced_projectile.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Assets\Rock\rock.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -111,10 +117,6 @@
     <None Update="SDL2_ttf.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Assets\Projectiles\" />
   </ItemGroup>
 
 </Project>

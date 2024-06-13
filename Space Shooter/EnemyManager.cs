@@ -13,6 +13,7 @@ namespace Space_Shooter
         private Game game;
 
         private int objectSize = 45;
+        private int advancedObjectSize = 90; // Increased size for advanced enemies
         private int projectileSize = 40;
         private int screenWidth;
         private int screenHeight;
@@ -26,15 +27,26 @@ namespace Space_Shooter
         private List<HealthBoost> healthBoosts;
         private List<BulletBoost> bulletBoosts;
         private uint lastSpawnTime;
+        private uint lastAdvancedEnemySpawnTime;
         private uint lastRockSpawnTime;
         private uint lastHealthBoostSpawnTime;
         private uint lastBulletBoostSpawnTime;
         private int spawnInterval = 2000;
+        private int advancedEnemySpawnInterval = 25000; // 20 seconds interval for advanced enemies
         private int rockSpawnInterval = 1500;
         private int healthBoostSpawnInterval = 10000; // 10 seconds interval
         private int bulletBoostSpawnInterval = 15000; // 15 seconds interval
 
         private bool isFastMode;
+        private int enemySequenceIndex = 0;
+        private EnemyType[] enemySequence = { EnemyType.Basic, EnemyType.Basic, EnemyType.Basic, EnemyType.Basic, EnemyType.Advanced };
+        private bool advancedEnemiesActive = false;
+
+        private enum EnemyType
+        {
+            Basic,
+            Advanced
+        }
 
         public EnemyManager(IntPtr renderer, int screenWidth, int screenHeight, List<Enemy> enemies, Game game)
         {
@@ -51,6 +63,7 @@ namespace Space_Shooter
             CreateEnemy();
             lastShootTime = SDL.SDL_GetTicks();
             lastSpawnTime = SDL.SDL_GetTicks();
+            lastAdvancedEnemySpawnTime = SDL.SDL_GetTicks();
             lastRockSpawnTime = SDL.SDL_GetTicks();
             lastHealthBoostSpawnTime = SDL.SDL_GetTicks();
             lastBulletBoostSpawnTime = SDL.SDL_GetTicks();
@@ -117,10 +130,23 @@ namespace Space_Shooter
                 lastShootTime = currentTime;
             }
 
-            if (currentTime > lastSpawnTime + spawnInterval)
+            if (game.GetScore() >= 1000)
             {
-                CreateEnemy();
-                lastSpawnTime = currentTime;
+                advancedEnemiesActive = true;
+                if (currentTime > lastAdvancedEnemySpawnTime + advancedEnemySpawnInterval)
+                {
+                    SpawnAdvancedEnemies();
+                    lastAdvancedEnemySpawnTime = currentTime;
+                }
+            }
+            else
+            {
+                advancedEnemiesActive = false;
+                if (currentTime > lastSpawnTime + spawnInterval)
+                {
+                    CreateEnemy();
+                    lastSpawnTime = currentTime;
+                }
             }
 
             if (currentTime > lastRockSpawnTime + rockSpawnInterval)
@@ -129,7 +155,7 @@ namespace Space_Shooter
                 lastRockSpawnTime = currentTime;
             }
 
-            if (currentTime > lastHealthBoostSpawnTime + healthBoostSpawnInterval && player.Health <= 3) // Spawn only if health is 3 or less
+            if (currentTime > lastHealthBoostSpawnTime + healthBoostSpawnInterval && player.Health <= 3)
             {
                 CreateHealthBoost();
                 lastHealthBoostSpawnTime = currentTime;
@@ -174,17 +200,37 @@ namespace Space_Shooter
         {
             int objectX = random.Next(0, screenWidth - objectSize);
             int objectY = -objectSize;
-            int speedX = random.Next(1, 4) * (random.Next(2) == 0 ? 1 : -1); // Random speed between -3 and 3
-            int speedY = random.Next(isFastMode ? 5 : 2, isFastMode ? 8 : 5); // Increase speed in fast mode
+            int speedX = random.Next(1, 4) * (random.Next(2) == 0 ? 1 : -1);
+            int speedY = random.Next(isFastMode ? 5 : 2, isFastMode ? 8 : 5);
 
-            enemies.Add(new BasicEnemy(objectX, objectY, objectSize, renderer, speedX, speedY, screenWidth));
+            var enemy = new BasicEnemy(objectX, objectY, objectSize, renderer, speedX, speedY, game);
+            enemies.Add(enemy);
+        }
+
+        private void SpawnAdvancedEnemies()
+        {
+            int spacing = screenWidth / 3; // Change to divide screen width into three parts
+            for (int i = 0; i < 2; i++) // Loop for only two enemies
+            {
+                int objectX = spacing * (i + 1) - advancedObjectSize / 2; // Adjust for larger size and new spacing
+                int objectY = 0;
+                Direction direction = i switch
+                {
+                    0 => Direction.RightDiagonal,
+                    1 => Direction.LeftDiagonal,
+                    _ => Direction.Straight
+                };
+                int moveDirection = i == 0 ? 1 : -1; // First enemy moves right, second moves left
+                var enemy = new AdvancedEnemy(objectX, objectY, advancedObjectSize, renderer, moveDirection * 2, 0, game, direction); // Set initial horizontal speed
+                enemies.Add(enemy);
+            }
         }
 
         private void CreateRock()
         {
             int rockX = random.Next(0, screenWidth - objectSize);
             int rockY = -objectSize;
-            int rockSpeed = random.Next(isFastMode ? 5 : 2, isFastMode ? 8 : 5); // Increase speed in fast mode
+            int rockSpeed = random.Next(isFastMode ? 5 : 2, isFastMode ? 8 : 5);
 
             rocks.Add(new Rock(rockX, rockY, objectSize, renderer, rockSpeed));
         }
@@ -193,7 +239,7 @@ namespace Space_Shooter
         {
             int boostX = random.Next(0, screenWidth - objectSize);
             int boostY = -objectSize;
-            int boostSpeed = random.Next(isFastMode ? 5 : 2, isFastMode ? 8 : 5); // Increase speed in fast mode
+            int boostSpeed = random.Next(isFastMode ? 5 : 2, isFastMode ? 8 : 5);
 
             healthBoosts.Add(new HealthBoost(boostX, boostY, objectSize, renderer, boostSpeed));
         }
@@ -202,7 +248,7 @@ namespace Space_Shooter
         {
             int boostX = random.Next(0, screenWidth - objectSize);
             int boostY = -objectSize;
-            int boostSpeed = random.Next(isFastMode ? 5 : 2, isFastMode ? 8 : 5); // Increase speed in fast mode
+            int boostSpeed = random.Next(isFastMode ? 5 : 2, isFastMode ? 8 : 5);
 
             bulletBoosts.Add(new BulletBoost(boostX, boostY, objectSize, renderer, boostSpeed));
         }
@@ -211,14 +257,18 @@ namespace Space_Shooter
         {
             foreach (var enemy in enemies)
             {
-                if (!enemy.IsHit())
+                if (!enemy.IsHit() && enemy is AdvancedEnemy advancedEnemy)
+                {
+                    advancedEnemy.Shoot(projectiles);
+                }
+                else
                 {
                     int projectileX = enemy.GetRect().x + objectSize / 2 - 23;
                     int projectileY = enemy.GetRect().y + objectSize - 5;
                     var projectile = new BasicProjectile(projectileX, projectileY, projectileSize, false, enemy);
                     if (isFastMode)
                     {
-                        projectile.SetSpeed(10); // Increase speed in fast mode
+                        projectile.Speed = 10;
                     }
                     projectiles.Add(projectile);
                 }
@@ -233,10 +283,10 @@ namespace Space_Shooter
         public void SetFastMode(bool isFast)
         {
             isFastMode = isFast;
-            spawnInterval = isFast ? 1000 : 2000; // Decrease spawn interval in fast mode
-            rockSpawnInterval = isFast ? 1000 : 1500; // Decrease rock spawn interval in fast mode
-            healthBoostSpawnInterval = isFast ? 5000 : 10000; // Decrease health boost spawn interval in fast mode
-            bulletBoostSpawnInterval = isFast ? 10000 : 15000; // Decrease bullet boost spawn interval in fast mode
+            spawnInterval = isFast ? 1000 : 2000;
+            rockSpawnInterval = isFast ? 1000 : 1500;
+            healthBoostSpawnInterval = isFast ? 5000 : 10000;
+            bulletBoostSpawnInterval = isFast ? 10000 : 15000;
         }
     }
 }

@@ -1,22 +1,25 @@
-﻿using SDL2;
+﻿// File: Projectile.cs
+
+using SDL2;
 
 namespace Space_Shooter
 {
     public class Projectile : GameObject
     {
         protected string? assetPath;
-        public int Speed { get; private set; }
+        public int Speed { get; set; } = 5;
+        public int SpeedX { get; set; }
         public GameObject Owner { get; private set; }
 
         public Projectile(int x, int y, int size, bool isUpwards, GameObject owner) : base(x, y, size, size)
         {
-            Speed = isUpwards ? -5 : 5; // Default speed
+            if (isUpwards) { Speed *= -1; }
             this.Owner = owner;
         }
 
         public override void Update()
         {
-            Move(0, Speed);
+            Move(SpeedX, Speed);
         }
 
         public string? GetAssetPath()
@@ -28,11 +31,6 @@ namespace Space_Shooter
         {
             renderer.Draw(this);
         }
-
-        public void SetSpeed(int newSpeed)
-        {
-            Speed = newSpeed;
-        }
     }
 
     public class BasicProjectile : Projectile
@@ -41,6 +39,15 @@ namespace Space_Shooter
             : base(x, y, size, isUpwards, owner)
         {
             assetPath = "Assets/Projectiles/projectile.png"; // Path to your projectile image
+        }
+    }
+
+    public class AdvancedProjectile : Projectile
+    {
+        public AdvancedProjectile(int x, int y, int size, bool isUpwards, GameObject owner)
+            : base(x, y, size, isUpwards, owner)
+        {
+            assetPath = "Assets/Projectiles/advanced_projectile.png"; // Path to your advanced projectile image
         }
     }
 }

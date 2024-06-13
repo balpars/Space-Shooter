@@ -7,38 +7,39 @@ namespace Space_Shooter
 {
     public class Enemy : GameObject
     {
-        protected string? assetPath; // Path to the texture asset for the enemy
-        private IntPtr renderer;
-        private IntPtr texture;
+        protected string? assetPath;
+        protected IntPtr renderer;
+        protected IntPtr texture;
         private bool isHit;
         private string hitAssetPath;
         private IntPtr hitTexture;
         private int points;
-        private int hitLifetime; // Enemy hit lifetime in ticks
+        private int hitLifetime;
         private int hitLifetimeRemaining;
         private bool isFlashing;
         private int flashCount;
         private uint lastFlashTime;
         private uint flashInterval;
         private bool isVisible;
-        private int screenWidth;
+        protected Game game;
 
-        public int SpeedX { get; private set; }
-        public int SpeedY { get; private set; }
+        public int SpeedX { get; protected set; }
+        public int SpeedY { get; protected set; }
 
-        public Enemy(int x, int y, int size, IntPtr renderer, int points, int speedX, int speedY, int screenWidth, int hitLifetime = 1000) : base(x, y, size, size)
+        public Enemy(int x, int y, int size, IntPtr renderer, int points, int speedX, int speedY, Game game)
+            : base(x, y, size, size)
         {
             this.renderer = renderer;
             this.points = points;
+            this.game = game;
             isHit = false;
-            this.hitLifetime = hitLifetime;
+            this.hitLifetime = 500; // Add appropriate value
             this.hitLifetimeRemaining = hitLifetime;
             isFlashing = false;
             flashCount = 0;
             lastFlashTime = 0;
-            flashInterval = 500; // milliseconds
+            flashInterval = 500;
             isVisible = true;
-            this.screenWidth = screenWidth;
 
             if (SDL_image.IMG_Init(SDL_image.IMG_InitFlags.IMG_INIT_PNG) == 0)
             {
@@ -63,11 +64,16 @@ namespace Space_Shooter
             SpeedY = speedY;
         }
 
+        public void SetSpeedY(int speedY)
+        {
+            SpeedY = speedY;
+        }
+
         public override void Update()
         {
             if (isHit)
             {
-                hitLifetimeRemaining -= 16; // Assuming Update is called every ~16ms (60 FPS)
+                hitLifetimeRemaining -= 16;
                 uint currentTime = SDL.SDL_GetTicks();
 
                 if (currentTime > lastFlashTime + flashInterval)
@@ -77,27 +83,26 @@ namespace Space_Shooter
                     lastFlashTime = currentTime;
                 }
 
-                if (flashCount >= 6) // Flash three times (6 visibility changes)
+                if (flashCount >= 6)
                 {
-                    isVisible = false; // Finally hide the enemy
+                    isVisible = false;
                     isFlashing = false;
                     hitLifetimeRemaining = 0;
                 }
 
                 if (hitLifetimeRemaining <= 0)
                 {
-                    rect.x = -1000; // Move it out of screen to ensure it is not rendered
+                    rect.x = -1000;
                 }
             }
             else
             {
-                Move(SpeedX, SpeedY); // Move diagonally
-
-                // Ensure the enemy stays within the screen bounds horizontally
-                if (rect.x < 0 || rect.x + rect.w > screenWidth)
+                // Ensure enemy stays within screen bounds
+                if (rect.x + SpeedX < 0 || rect.x + SpeedX + rect.w > game.windowWidth)
                 {
-                    SpeedX = -SpeedX; // Reverse direction
+                    SpeedX = -SpeedX;
                 }
+                Move(SpeedX, SpeedY);
             }
         }
 
@@ -110,13 +115,13 @@ namespace Space_Shooter
             }
         }
 
-        public void OnHit()
+        public virtual void OnHit()
         {
             isHit = true;
             isFlashing = true;
             flashCount = 0;
             lastFlashTime = SDL.SDL_GetTicks();
-            hitLifetimeRemaining = hitLifetime; // Reset the lifetime when hit
+            hitLifetimeRemaining = hitLifetime;
         }
 
         public bool IsHit()
@@ -148,8 +153,8 @@ namespace Space_Shooter
 
     class BasicEnemy : Enemy
     {
-        public BasicEnemy(int x, int y, int size, IntPtr renderer, int speedX, int speedY, int screenWidth)
-            : base(x, y, size, renderer, 100, speedX, speedY, screenWidth)
+        public BasicEnemy(int x, int y, int size, IntPtr renderer, int speedX, int speedY, Game game)
+            : base(x, y, size, renderer, 100, speedX, speedY, game)
         {
         }
     }

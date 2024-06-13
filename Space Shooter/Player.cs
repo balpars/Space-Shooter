@@ -18,7 +18,11 @@ namespace Space_Shooter
         private uint lastShootTime;
         private int shootInterval = 200; // milliseconds
         private Game game;
-        private int speed;
+        private float velocityX;
+        private float velocityY;
+        private float acceleration = 0.5f; // Acceleration rate
+        private float maxSpeed = 5f; // Maximum speed
+        private float deceleration = 0.95f; // Deceleration rate
         public List<Heart> hearts;
         private IntPtr shootSound;
         private IntPtr powerUpSound; // Sound for power-up collision
@@ -43,7 +47,6 @@ namespace Space_Shooter
             this.screenHeight = h;
             this.enemies = enemies;
             this.game = game;
-            this.speed = 5;
             this.Health = health;
             projectiles = new List<Projectile>();
             lastShootTime = SDL.SDL_GetTicks();
@@ -89,28 +92,52 @@ namespace Space_Shooter
             {
                 tripleShotActive = false;
             }
+
+            // Apply deceleration
+            velocityX *= deceleration;
+            velocityY *= deceleration;
+
+            // Move player based on velocity
+            int newX = PositionX + (int)velocityX;
+            int newY = PositionY + (int)velocityY;
+
+            // Ensure the player stays within the screen bounds
+            if (newX < 0) newX = 0;
+            if (newX + rect.w > screenWidth) newX = screenWidth - rect.w;
+            if (newY < 0) newY = 0;
+            if (newY + rect.h > screenHeight) newY = screenHeight - rect.h;
+
+            Move(newX - PositionX, newY - PositionY);
+
+            PositionX = newX;
+            PositionY = newY;
+        }
+        public int GetScore()
+        {
+            return game.GetScore();
         }
 
         public void HandleInput(byte[] keys, IntPtr gameController)
         {
-            int newX = PositionX;
-            int newY = PositionY;
-
             if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_UP] == 1)
             {
-                newY -= speed;
+                velocityY -= acceleration;
+                if (velocityY < -maxSpeed) velocityY = -maxSpeed;
             }
             if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_DOWN] == 1)
             {
-                newY += speed;
+                velocityY += acceleration;
+                if (velocityY > maxSpeed) velocityY = maxSpeed;
             }
             if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_LEFT] == 1)
             {
-                newX -= speed;
+                velocityX -= acceleration;
+                if (velocityX < -maxSpeed) velocityX = -maxSpeed;
             }
             if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_RIGHT] == 1)
             {
-                newX += speed;
+                velocityX += acceleration;
+                if (velocityX > maxSpeed) velocityX = maxSpeed;
             }
             if (keys[(int)SDL.SDL_Scancode.SDL_SCANCODE_SPACE] == 1)
             {
@@ -126,19 +153,23 @@ namespace Space_Shooter
 
                 if (leftX < -DEAD_ZONE)
                 {
-                    newX -= speed;
+                    velocityX -= acceleration;
+                    if (velocityX < -maxSpeed) velocityX = -maxSpeed;
                 }
                 if (leftX > DEAD_ZONE)
                 {
-                    newX += speed;
+                    velocityX += acceleration;
+                    if (velocityX > maxSpeed) velocityX = maxSpeed;
                 }
                 if (leftY < -DEAD_ZONE)
                 {
-                    newY -= speed;
+                    velocityY -= acceleration;
+                    if (velocityY < -maxSpeed) velocityY = -maxSpeed;
                 }
                 if (leftY > DEAD_ZONE)
                 {
-                    newY += speed;
+                    velocityY += acceleration;
+                    if (velocityY > maxSpeed) velocityY = maxSpeed;
                 }
 
                 if (SDL.SDL_GameControllerGetButton(gameController, SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_X) == 1)
@@ -146,17 +177,6 @@ namespace Space_Shooter
                     Shoot();
                 }
             }
-
-            // Ensure the player stays within the screen bounds
-            if (newX < 0) newX = 0;
-            if (newX + rect.w > screenWidth) newX = screenWidth - rect.w;
-            if (newY < 0) newY = 0;
-            if (newY + rect.h > screenHeight) newY = screenHeight - rect.h;
-
-            Move(newX - PositionX, newY - PositionY);
-
-            PositionX = newX;
-            PositionY = newY;
         }
 
         private void Shoot()
@@ -169,7 +189,7 @@ namespace Space_Shooter
 
                 // Single projectile
                 var centerProjectile = new BasicProjectile(projectileXCenter, projectileY, 20, true, this);
-                centerProjectile.SetSpeed(-10); // Set speed to move upwards
+                centerProjectile.Speed = -10; // Set speed to move upwards
                 projectiles.Add(centerProjectile);
 
                 // Triple shot if active
@@ -181,8 +201,8 @@ namespace Space_Shooter
                     var leftProjectile = new BasicProjectile(projectileXLeft, projectileY, 20, true, this);
                     var rightProjectile = new BasicProjectile(projectileXRight, projectileY, 20, true, this);
 
-                    leftProjectile.SetSpeed(-10); // Set speed to move upwards
-                    rightProjectile.SetSpeed(-10); // Set speed to move upwards
+                    leftProjectile.Speed = -10; // Set speed to move upwards
+                    rightProjectile.Speed = -10; // Set speed to move upwards
 
                     projectiles.Add(leftProjectile);
                     projectiles.Add(rightProjectile);
