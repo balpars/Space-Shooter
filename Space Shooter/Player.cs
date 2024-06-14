@@ -29,8 +29,12 @@ namespace Space_Shooter
         private IntPtr healthBoostSound; // Sound for health boost collision
         private Dictionary<int, IntPtr> textures; // Store textures based on health
         private IntPtr texture; // Current texture
+        private IntPtr shieldTexture; // Shield texture
+        private IntPtr originalTexture; // Original player texture
         private bool tripleShotActive;
         private uint tripleShotEndTime;
+        private bool shieldActive;
+        private uint shieldEndTime;
 
         public Player(IntPtr renderer, int w, int h, List<Enemy> enemies, Game game, int health) : base((w - 100) / 2, (h - 100) / 2, 100, 100)
         {
@@ -40,7 +44,7 @@ namespace Space_Shooter
                 "Assets/Player/player_3.png",
                 "Assets/Player/player_4.png"
             };
-
+            shieldActive = false;
             this.PositionX = (w - 100) / 2;
             this.PositionY = (h - 100) / 2;
             this.screenWidth = w;
@@ -68,9 +72,13 @@ namespace Space_Shooter
                 textures.Add(i + 1, texture);
             }
 
+            // Load shield texture
+            shieldTexture = SDL_image.IMG_LoadTexture(renderer, "Assets/ShieldBoost/shield_boost.png");
+
             // Set initial texture
             SetTexture(renderer);
 
+            originalTexture = texture; // Save original texture
             tripleShotActive = false; // Initialize triple shot mode as inactive
         }
 
@@ -93,6 +101,13 @@ namespace Space_Shooter
                 tripleShotActive = false;
             }
 
+            // Check if shield duration has ended
+            if (shieldActive && SDL.SDL_GetTicks() > shieldEndTime)
+            {
+                shieldActive = false;
+                SetPlayerAsset(originalTexture); // Restore original texture
+            }
+
             // Apply deceleration
             velocityX *= deceleration;
             velocityY *= deceleration;
@@ -112,6 +127,32 @@ namespace Space_Shooter
             PositionX = newX;
             PositionY = newY;
         }
+
+        public void ActivateShield(uint duration)
+        {
+            shieldActive = true;
+            shieldEndTime = SDL.SDL_GetTicks() + duration;
+            SetPlayerAsset(shieldTexture); // Change to shield texture
+        }
+
+        public void OnHit()
+        {
+            if (!shieldActive)
+            {
+                // Reduce health or handle player hit logic
+                UpdateHealth(-1);
+                if (Health <= 0)
+                {
+                    game.GameOver();
+                }
+            }
+        }
+
+        public void SetPlayerAsset(IntPtr newTexture)
+        {
+            texture = newTexture;
+        }
+
         public int GetScore()
         {
             return game.GetScore();
@@ -299,17 +340,20 @@ namespace Space_Shooter
 
         public void UpdateHealth(int amount)
         {
-            Health += amount;
-            if (Health > 5)
+            if (!shieldActive)
             {
-                Health = 5; // Cap health at 5
+                Health += amount;
+                if (Health > 5)
+                {
+                    Health = 5; // Cap health at 5
+                }
+                else if (Health < 0)
+                {
+                    Health = 0;
+                }
+                SetTexture(game.renderer.RendererHandle); // Update the texture based on the new health
+                UpdateHearts(); // Update hearts display
             }
-            else if (Health < 0)
-            {
-                Health = 0;
-            }
-            SetTexture(game.renderer.RendererHandle); // Update the texture based on the new health
-            UpdateHearts(); // Update hearts display
         }
 
         public void ActivateTripleShot(uint duration)
@@ -326,6 +370,14 @@ namespace Space_Shooter
         public void PlayHealthBoostSound()
         {
             SoundManager.PlaySound(healthBoostSound);
+        }
+
+        public override void Render(IntPtr renderer)
+        {
+            if (texture != IntPtr.Zero)
+            {
+                SDL.SDL_RenderCopy(renderer, texture, IntPtr.Zero, ref rect);
+            }
         }
     }
 }

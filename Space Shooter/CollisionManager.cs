@@ -144,6 +144,23 @@ namespace Space_Shooter
             }
         }
 
+        public static void CheckShieldBoostCollisions(List<ShieldBoost> shieldBoosts, Player player, Game game)
+        {
+            for (int i = shieldBoosts.Count - 1; i >= 0; i--)
+            {
+                var shieldBoost = shieldBoosts[i];
+                var shieldBoostRect = shieldBoost.GetRect();
+
+                if (IsColliding(shieldBoostRect, player.GetCollisionRect()))
+                {
+                    shieldBoosts.RemoveAt(i);
+                    player.ActivateShield(10000); // Activate shield for 10 seconds
+                    player.PlayPowerUpSound();
+                    
+                }
+            }
+        }
+
         public static bool IsColliding(SDL.SDL_Rect rect1, SDL.SDL_Rect rect2)
         {
             return rect1.x < rect2.x + rect2.w &&

@@ -26,16 +26,19 @@ namespace Space_Shooter
         private List<Rock> rocks;
         private List<HealthBoost> healthBoosts;
         private List<BulletBoost> bulletBoosts;
+        private List<ShieldBoost> shieldBoosts;
         private uint lastSpawnTime;
         private uint lastAdvancedEnemySpawnTime;
         private uint lastRockSpawnTime;
         private uint lastHealthBoostSpawnTime;
         private uint lastBulletBoostSpawnTime;
+        private uint lastShieldBoostSpawnTime;
         private int spawnInterval = 2000;
         private int advancedEnemySpawnInterval = 25000; // 20 seconds interval for advanced enemies
         private int rockSpawnInterval = 1500;
         private int healthBoostSpawnInterval = 10000; // 10 seconds interval
         private int bulletBoostSpawnInterval = 15000; // 15 seconds interval
+        private int shieldBoostSpawnInterval = 20000; // 20 seconds interval
 
         private bool isFastMode;
         private int enemySequenceIndex = 0;
@@ -60,6 +63,7 @@ namespace Space_Shooter
             rocks = new List<Rock>();
             healthBoosts = new List<HealthBoost>();
             bulletBoosts = new List<BulletBoost>();
+            shieldBoosts = new List<ShieldBoost>();
             CreateEnemy();
             lastShootTime = SDL.SDL_GetTicks();
             lastSpawnTime = SDL.SDL_GetTicks();
@@ -67,6 +71,7 @@ namespace Space_Shooter
             lastRockSpawnTime = SDL.SDL_GetTicks();
             lastHealthBoostSpawnTime = SDL.SDL_GetTicks();
             lastBulletBoostSpawnTime = SDL.SDL_GetTicks();
+            lastShieldBoostSpawnTime = SDL.SDL_GetTicks();
             isFastMode = false;
         }
 
@@ -119,10 +124,20 @@ namespace Space_Shooter
                 }
             }
 
+            for (int i = shieldBoosts.Count - 1; i >= 0; i--)
+            {
+                shieldBoosts[i].Update();
+                if (shieldBoosts[i].GetRect().y > screenHeight)
+                {
+                    shieldBoosts.RemoveAt(i);
+                }
+            }
+
             CollisionManager.CheckCollisions(projectiles, enemies, player, game);
             CollisionManager.CheckRockCollisions(rocks, player, game);
             CollisionManager.CheckHealthBoostCollisions(healthBoosts, player, game);
             CollisionManager.CheckBulletBoostCollisions(bulletBoosts, player, game);
+            CollisionManager.CheckShieldBoostCollisions(shieldBoosts, player, game);
 
             if (currentTime > lastShootTime + shootInterval)
             {
@@ -166,6 +181,12 @@ namespace Space_Shooter
                 CreateBulletBoost();
                 lastBulletBoostSpawnTime = currentTime;
             }
+
+            if (currentTime > lastShieldBoostSpawnTime + shieldBoostSpawnInterval)
+            {
+                CreateShieldBoost();
+                lastShieldBoostSpawnTime = currentTime;
+            }
         }
 
         public void Render(Renderer renderer)
@@ -193,6 +214,11 @@ namespace Space_Shooter
             foreach (var bulletBoost in bulletBoosts)
             {
                 bulletBoost.Render(renderer.RendererHandle);
+            }
+
+            foreach (var shieldBoost in shieldBoosts)
+            {
+                shieldBoost.Render(renderer.RendererHandle);
             }
         }
 
@@ -253,6 +279,15 @@ namespace Space_Shooter
             bulletBoosts.Add(new BulletBoost(boostX, boostY, objectSize, renderer, boostSpeed));
         }
 
+        private void CreateShieldBoost()
+        {
+            int boostX = random.Next(0, screenWidth - objectSize);
+            int boostY = -objectSize;
+            int boostSpeed = random.Next(isFastMode ? 5 : 2, isFastMode ? 8 : 5);
+
+            shieldBoosts.Add(new ShieldBoost(boostX, boostY, objectSize, renderer, boostSpeed));
+        }
+
         private void Shoot()
         {
             foreach (var enemy in enemies)
@@ -287,6 +322,7 @@ namespace Space_Shooter
             rockSpawnInterval = isFast ? 1000 : 1500;
             healthBoostSpawnInterval = isFast ? 5000 : 10000;
             bulletBoostSpawnInterval = isFast ? 10000 : 15000;
+            shieldBoostSpawnInterval = isFast ? 10000 : 20000;
         }
     }
 }

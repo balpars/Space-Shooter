@@ -42,6 +42,7 @@ namespace Space_Shooter
         private uint scoreTransformStartTime;
         private uint scoreTransformDuration = 500; // Duration in milliseconds
         private bool isFastMode; // To track if fast mode is activated
+        private List<ShieldBoost> shieldBoosts;
 
         public Game()
         {
@@ -60,6 +61,7 @@ namespace Space_Shooter
             scoreTransformed = false;
             scoreTransformStartTime = 0;
             isFastMode = false;
+            shieldBoosts = new List<ShieldBoost>();
         }
 
         public void Init(string title, int width, int height)
@@ -266,6 +268,10 @@ namespace Space_Shooter
                 RenderCollisionEffects();
                 RenderScore();
                 RenderHighScore(); // Render high score
+                foreach (var shieldBoost in shieldBoosts)
+                {
+                    shieldBoost.Render(renderer.RendererHandle);
+                }
             }
             else if (gameState == GameState.GameOver)
             {
