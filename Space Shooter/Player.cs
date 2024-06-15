@@ -29,8 +29,6 @@ namespace Space_Shooter
         private IntPtr healthBoostSound; // Sound for health boost collision
         private Dictionary<int, IntPtr> textures; // Store textures based on health
         private IntPtr texture; // Current texture
-        private IntPtr shieldTexture; // Shield texture
-        private IntPtr originalTexture; // Original player texture
         private bool tripleShotActive;
         private uint tripleShotEndTime;
         private bool shieldActive;
@@ -42,7 +40,8 @@ namespace Space_Shooter
                 "Assets/Player/player_1.png",
                 "Assets/Player/player_2.png",
                 "Assets/Player/player_3.png",
-                "Assets/Player/player_4.png"
+                "Assets/Player/player_4.png",
+                "Assets/Player/protected_player.png" // Added protected player asset
             };
             shieldActive = false;
             this.PositionX = (w - 100) / 2;
@@ -69,16 +68,12 @@ namespace Space_Shooter
             for (int i = 0; i < assetPaths.Length; i++)
             {
                 IntPtr texture = SDL_image.IMG_LoadTexture(renderer, assetPaths[i]);
-                textures.Add(i + 1, texture);
+                textures.Add(i, texture);
             }
 
-            // Load shield texture
-            shieldTexture = SDL_image.IMG_LoadTexture(renderer, "Assets/ShieldBoost/shield_boost.png");
-
             // Set initial texture
-            SetTexture(renderer);
+            SetTexture(renderer, GetTextureIndexByHealth());
 
-            originalTexture = texture; // Save original texture
             tripleShotActive = false; // Initialize triple shot mode as inactive
         }
 
@@ -105,7 +100,7 @@ namespace Space_Shooter
             if (shieldActive && SDL.SDL_GetTicks() > shieldEndTime)
             {
                 shieldActive = false;
-                SetPlayerAsset(originalTexture); // Restore original texture
+                SetTexture(game.renderer.RendererHandle, GetTextureIndexByHealth()); // Restore original texture based on health
             }
 
             // Apply deceleration
@@ -132,7 +127,7 @@ namespace Space_Shooter
         {
             shieldActive = true;
             shieldEndTime = SDL.SDL_GetTicks() + duration;
-            SetPlayerAsset(shieldTexture); // Change to shield texture
+            SetTexture(game.renderer.RendererHandle, 4); // Set to protected player asset
         }
 
         public void OnHit()
@@ -148,9 +143,28 @@ namespace Space_Shooter
             }
         }
 
-        public void SetPlayerAsset(IntPtr newTexture)
+        private int GetTextureIndexByHealth()
         {
-            texture = newTexture;
+            if (shieldActive)
+            {
+                return 4; // protected_player.png
+            }
+            return Health switch
+            {
+                5 => 3, // player_4.png
+                4 => 2, // player_3.png
+                3 => 1, // player_2.png
+                _ => 0  // player_1.png for 2 and 1 health
+            };
+        }
+
+        public void SetPlayerAsset(int assetIndex)
+        {
+            if (textures.ContainsKey(assetIndex))
+            {
+                SDL.SDL_DestroyTexture(texture); // Destroy the previous texture
+                texture = textures[assetIndex];
+            }
         }
 
         public int GetScore()
@@ -293,14 +307,7 @@ namespace Space_Shooter
 
         public string? GetAssetPath()
         {
-            int assetIndex = Health switch
-            {
-                5 => 3, // player_4.png
-                4 => 2, // player_3.png
-                3 => 1, // player_2.png
-                _ => 0  // player_1.png for 2 and 1 health
-            };
-            return assetPaths[assetIndex]; // Return the current asset path based on health
+            return assetPaths[GetTextureIndexByHealth()]; // Return the current asset path based on health or shield status
         }
 
         public List<Projectile> GetProjectiles()
@@ -322,15 +329,8 @@ namespace Space_Shooter
             };
         }
 
-        public void SetTexture(IntPtr renderer)
+        public void SetTexture(IntPtr renderer, int assetIndex)
         {
-            int assetIndex = Health switch
-            {
-                5 => 4, // player_4.png
-                4 => 3, // player_3.png
-                3 => 2, // player_2.png
-                _ => 1  // player_1.png for 2 and 1 health
-            };
             if (textures.ContainsKey(assetIndex))
             {
                 SDL.SDL_DestroyTexture(texture); // Destroy the previous texture
@@ -351,7 +351,7 @@ namespace Space_Shooter
                 {
                     Health = 0;
                 }
-                SetTexture(game.renderer.RendererHandle); // Update the texture based on the new health
+                SetTexture(game.renderer.RendererHandle, GetTextureIndexByHealth()); // Update the texture based on the new health or shield status
                 UpdateHearts(); // Update hearts display
             }
         }
@@ -370,14 +370,6 @@ namespace Space_Shooter
         public void PlayHealthBoostSound()
         {
             SoundManager.PlaySound(healthBoostSound);
-        }
-
-        public override void Render(IntPtr renderer)
-        {
-            if (texture != IntPtr.Zero)
-            {
-                SDL.SDL_RenderCopy(renderer, texture, IntPtr.Zero, ref rect);
-            }
         }
     }
 }

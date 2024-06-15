@@ -156,10 +156,10 @@ namespace Space_Shooter
                     shieldBoosts.RemoveAt(i);
                     player.ActivateShield(10000); // Activate shield for 10 seconds
                     player.PlayPowerUpSound();
-                    
                 }
             }
         }
+
 
         public static bool IsColliding(SDL.SDL_Rect rect1, SDL.SDL_Rect rect2)
         {

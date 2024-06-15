@@ -1,4 +1,6 @@
-﻿using SDL2;
+﻿// File: Renderer.cs
+
+using SDL2;
 using System;
 
 namespace Space_Shooter
@@ -47,8 +49,19 @@ namespace Space_Shooter
             {
                 IntPtr texture = TextureManager.LoadTexture(player.GetAssetPath(), renderer);
                 SDL.SDL_Rect srcRect = new SDL.SDL_Rect { x = 0, y = 0, w = 100, h = 100 };
-                SDL.SDL_Rect destRect = new SDL.SDL_Rect { x = player.PositionX, y = player.PositionY, w = 100, h = 100 };
-                // TO-DO Make w and h size of asset instead of hardcoding
+                SDL.SDL_Rect destRect;
+
+                // Check if the current asset is the protected player asset
+                if (player.GetAssetPath().Contains("protected_player.png"))
+                {
+                    // Render the protected player asset at 60x60 size
+                    destRect = new SDL.SDL_Rect { x = player.PositionX+20, y = player.PositionY, w = 60, h = 60 };
+                }
+                else
+                {
+                    // Render other player assets at their original size
+                    destRect = new SDL.SDL_Rect { x = player.PositionX, y = player.PositionY, w = 100, h = 100 };
+                }
 
                 SDL.SDL_RenderCopy(renderer, texture, ref srcRect, ref destRect);
             }
@@ -57,8 +70,7 @@ namespace Space_Shooter
                 IntPtr texture = TextureManager.LoadTexture(projectile.GetAssetPath(), renderer);
                 SDL.SDL_Rect srcRect = new SDL.SDL_Rect { x = 0, y = 0, w = 100, h = 100 };
                 SDL.SDL_Rect destRect = obj.GetRect();
-                // TO-DO Make w and h size of asset instead of hardcoding
-
+                // Ensure the projectile texture is scaled correctly
                 SDL.SDL_RenderCopy(renderer, texture, ref srcRect, ref destRect);
             }
             else if (obj is Heart heart && heart.GetAssetPath() != null)
@@ -66,19 +78,16 @@ namespace Space_Shooter
                 IntPtr texture = TextureManager.LoadTexture(heart.GetAssetPath(), renderer);
                 SDL.SDL_Rect srcRect = new SDL.SDL_Rect { x = 0, y = 0, w = 100, h = 100 };
                 SDL.SDL_Rect destRect = obj.GetRect();
-                // TO-DO: Make w and h size of asset instead of hardcoding
-
+                // Ensure the heart texture is scaled correctly
                 SDL.SDL_RenderCopy(renderer, texture, ref srcRect, ref destRect);
             }
-
-            else // If There are no assets draw Red rectangles
+            else // If there are no assets, draw red rectangles
             {
                 SDL.SDL_Rect rect = obj.GetRect();
                 SDL.SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);
                 SDL.SDL_RenderFillRect(renderer, ref rect);
             }
         }
-
 
         public void Present()
         {
@@ -94,6 +103,5 @@ namespace Space_Shooter
         {
             return this.renderer;
         }
-
     }
 }
