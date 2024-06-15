@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using SDL2;
@@ -145,12 +146,24 @@ namespace Space_Shooter
 
         public void Run()
         {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            long previousTime = stopwatch.ElapsedMilliseconds;
+            const double frameTime = 1000.0 / 60.0; // Targeting 60 FPS
+
             while (isRunning)
             {
-                HandleEvents();
-                Update();
-                Render();
-                SDL.SDL_Delay(16); // ~60 FPS
+                long currentTime = stopwatch.ElapsedMilliseconds;
+                long elapsedTime = currentTime - previousTime;
+
+                if (elapsedTime >= frameTime)
+                {
+                    HandleEvents();
+                    Update();
+                    Render();
+
+                    previousTime = currentTime;
+                }
             }
 
             SaveHighScore(); // Save high score to file
