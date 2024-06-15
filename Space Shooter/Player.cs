@@ -266,7 +266,10 @@ namespace Space_Shooter
 
                 lastShootTime = currentTime;
                 SoundManager.PlaySound(shootSound); // Play the shoot sound
+
+                //Console.WriteLine("Projectile Owner:" + centerProjectile.Owner);
             }
+
         }
 
         private void UpdateProjectiles()
@@ -372,5 +375,11 @@ namespace Space_Shooter
         {
             SoundManager.PlaySound(healthBoostSound);
         }
+
+        public GameObject getInstance()
+        {
+            return this;
+        }
+
     }
 }

@@ -84,21 +84,23 @@ namespace Space_Shooter
                     {
                         player.UpdateHealth(-1); // Reduce health by 1
                     }
-                    else
-                    {
-                        game.GameOver();
-                    }
+                    //else
+                    //{
+                    //    game.GameOver();
+                    //}
                 }
             }
         }
 
-        public static void CheckRockCollisions(List<Rock> rocks, Player player, Game game)
+        //public static void CheckRockCollisions(List<Rock> rocks, Player player, Game game)
+        public static void CheckRockCollisions(List<Rock> rocks, List<Projectile> projectiles,Player player, Game game)
         {
             for (int i = rocks.Count - 1; i >= 0; i--)
             {
                 var rock = rocks[i];
                 var rockRect = rock.GetRect();
 
+                // Player Rock Collision
                 if (IsColliding(rockRect, player.GetCollisionRect()))
                 {
                     int effectX = rockRect.x + rockRect.w / 2;
@@ -110,13 +112,31 @@ namespace Space_Shooter
                     {
                         player.UpdateHealth(-1); // Reduce health by 1
                     }
-                    else
-                    {
-                        game.GameOver();
-                    }
+                    //else
+                    //{
+                    //    game.GameOver();
+                    //}
                 }
 
 
+
+                for (int j = projectiles.Count - 1; j >= 0; j--)
+                {
+                    var projectile = projectiles[j];
+                    var projectileRect = projectile.GetRect();
+                    
+                    if (projectile.Owner == player && IsColliding(projectileRect, rockRect))
+                    {
+                        int effectX = projectileRect.x - projectileRect.w / 2;
+                        int effectY = projectileRect.y - projectileRect.h / 2;
+                        game.AddCollisionEffect(effectX, effectY);
+                        projectiles.RemoveAt(j);
+                        game.PlayCollisionSound();
+                        break;
+                    }
+
+
+                }
             }
         }
 

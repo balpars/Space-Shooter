@@ -26,7 +26,7 @@ namespace Space_Shooter
         private GameState gameState;
         private IntPtr backgroundMusic;
         private IntPtr collisionSound;
-        private IntPtr healthBoostSound; // Add this line
+        private IntPtr healthBoostSound; 
         private IntPtr gameController;
         private int score = 0;
         private int highScore;
@@ -55,7 +55,7 @@ namespace Space_Shooter
             collisionEffects = new List<CollisionEffect>();
             projectiles = new List<Projectile>();
             gameState = GameState.TitleScreen;
-            score = 1900;
+            score = 1900; // HERE
             scoreTexture = IntPtr.Zero;
             highScoreTexture = IntPtr.Zero; // Initialize high score texture
             playerHealth = 5;
@@ -116,7 +116,7 @@ namespace Space_Shooter
             }
 
             collisionSound = SoundManager.LoadSound("Assets/Sounds/collision.wav");
-            healthBoostSound = SoundManager.LoadSound("Assets/Sounds/health_boost.wav"); // Add this line
+            healthBoostSound = SoundManager.LoadSound("Assets/Sounds/health_boost.wav");
             gameOverSound = SoundManager.LoadSound("Assets/Sounds/game_over.wav");
 
             if (SDL.SDL_NumJoysticks() > 0)
@@ -226,7 +226,7 @@ namespace Space_Shooter
             {
                 player.Update();
                 enemyManager.Update(player);
-                CollisionManager.CheckEnemyCollisions(player.GetProjectiles(), enemyList, player, this);
+                //CollisionManager.CheckEnemyCollisions(player.GetProjectiles(), enemyList, player, this);
                 UpdateCollisionEffects();
                 foreach (var bg in backgrounds)
                 {
@@ -447,7 +447,7 @@ namespace Space_Shooter
 
             SDL_mixer.Mix_FreeMusic(backgroundMusic);
             SDL_mixer.Mix_FreeChunk(collisionSound);
-            SDL_mixer.Mix_FreeChunk(healthBoostSound); // Add this line
+            SDL_mixer.Mix_FreeChunk(healthBoostSound); 
             SDL_mixer.Mix_FreeChunk(gameOverSound);
             SoundManager.Cleanup();
 

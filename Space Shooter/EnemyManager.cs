@@ -139,8 +139,10 @@ namespace Space_Shooter
                 }
             }
 
-            CollisionManager.CheckEnemyCollisions(projectiles, enemies, player, game);
-            CollisionManager.CheckRockCollisions(rocks, player, game);
+            CollisionManager.CheckEnemyCollisions(this.projectiles, enemies, player, game);
+            CollisionManager.CheckEnemyCollisions(player.GetProjectiles(), enemies, player, game);
+            //CollisionManager.CheckRockCollisions(rocks, projectiles, player, game);
+            CollisionManager.CheckRockCollisions(rocks, player.GetProjectiles(), player, game);
             CollisionManager.CheckHealthBoostCollisions(healthBoosts, player, game);
             CollisionManager.CheckBulletBoostCollisions(bulletBoosts, player, game);
             CollisionManager.CheckShieldBoostCollisions(shieldBoosts, player, game);
