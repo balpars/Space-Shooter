@@ -28,7 +28,7 @@ namespace Space_Shooter
         private IntPtr collisionSound;
         private IntPtr healthBoostSound; // Add this line
         private IntPtr gameController;
-        private int score;
+        private int score = 0;
         private int highScore;
         private string highScoreFile = "highscore.txt"; // High score file
         private IntPtr font;
@@ -55,7 +55,7 @@ namespace Space_Shooter
             collisionEffects = new List<CollisionEffect>();
             projectiles = new List<Projectile>();
             gameState = GameState.TitleScreen;
-            score = 0;
+            score = 1900;
             scoreTexture = IntPtr.Zero;
             highScoreTexture = IntPtr.Zero; // Initialize high score texture
             playerHealth = 5;
@@ -226,7 +226,7 @@ namespace Space_Shooter
             {
                 player.Update();
                 enemyManager.Update(player);
-                CollisionManager.CheckCollisions(player.GetProjectiles(), enemyList, player, this);
+                CollisionManager.CheckEnemyCollisions(player.GetProjectiles(), enemyList, player, this);
                 UpdateCollisionEffects();
                 foreach (var bg in backgrounds)
                 {

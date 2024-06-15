@@ -8,7 +8,7 @@ namespace Space_Shooter
 {
     public static class CollisionManager
     {
-        public static void CheckCollisions(List<Projectile> projectiles, List<Enemy> enemies, Player player, Game game)
+        public static void CheckEnemyCollisions(List<Projectile> projectiles, List<Enemy> enemies, Player player, Game game)
         {
             for (int i = projectiles.Count - 1; i >= 0; i--)
             {
@@ -21,10 +21,14 @@ namespace Space_Shooter
                     var enemyRect = enemy.GetRect();
 
                     // Skip collision check if the projectile owner is an enemy and the target is also an enemy
-                    if (projectile.Owner is Enemy && projectile.Owner != enemy && IsColliding(projectileRect, enemyRect))
+                    //if (projectile.Owner is Enemy && projectile.Owner != enemy && IsColliding(projectileRect, enemyRect))
+                    if (projectile.Owner is Enemy && IsColliding(projectileRect, enemyRect))
                     {
                         continue;
                     }
+
+
+                    // Player bullet to Enemy
                     if (projectile.Owner != enemy && IsColliding(projectileRect, enemyRect))
                     {
                         int effectX = projectileRect.x - projectileRect.w / 2;
@@ -34,13 +38,14 @@ namespace Space_Shooter
                         if (!enemy.IsHit())
                         {
                             enemy.OnHit();
-                            game.IncreaseScore(enemy.GetPoints());
+                            //game.IncreaseScore(enemy.GetPoints());
                         }
                         game.PlayCollisionSound();
                         break;
                     }
                 }
 
+                // Enemy bullet to player
                 if (projectile.Owner is Enemy && IsColliding(projectileRect, player.GetCollisionRect()))
                 {
                     int effectX = projectileRect.x + projectileRect.w / 2 - 5;
@@ -52,10 +57,11 @@ namespace Space_Shooter
                     {
                         player.UpdateHealth(-1); // Reduce health by 1
                     }
-                    else
-                    {
-                        game.GameOver();
-                    }
+
+                    // else
+                    // {
+                    //    game.GameOver();
+                    // }
                 }
             }
 
@@ -71,7 +77,7 @@ namespace Space_Shooter
                     if (!enemy.IsHit())
                     {
                         enemy.OnHit();
-                        game.IncreaseScore(enemy.GetPoints());
+                        //game.IncreaseScore(enemy.GetPoints());
                     }
                     game.PlayCollisionSound();
                     if (player.Health > 0)
@@ -109,6 +115,8 @@ namespace Space_Shooter
                         game.GameOver();
                     }
                 }
+
+
             }
         }
 

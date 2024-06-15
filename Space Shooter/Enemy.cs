@@ -92,7 +92,9 @@ namespace Space_Shooter
 
                 if (hitLifetimeRemaining <= 0)
                 {
-                    rect.x = -1000;
+                    //rect.x = -1000;
+       
+                    this.Cleanup();
                 }
             }
             else
@@ -129,10 +131,11 @@ namespace Space_Shooter
             return isHit;
         }
 
-        public bool IsExpired()
-        {
-            return !isHit && rect.x == -1000;
-        }
+
+        //public bool IsExpired()
+        //{
+        //    return !isHit && rect.x == -1000;
+        //}
 
         public int GetPoints()
         {
@@ -157,5 +160,15 @@ namespace Space_Shooter
             : base(x, y, size, renderer, 100, speedX, speedY, game)
         {
         }
+
+        public override void OnHit()
+        {
+            {
+                game.IncreaseScore(100);
+                base.OnHit();
+            }
+        }
+
+
     }
 }

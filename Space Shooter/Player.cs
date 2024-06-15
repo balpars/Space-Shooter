@@ -85,9 +85,10 @@ namespace Space_Shooter
             {
                 game.GameOver(); // Trigger game over if health is zero
             }
+
             else
             {
-                CollisionManager.CheckCollisions(projectiles, enemies, this, game);
+                //CollisionManager.CheckEnemyCollisions(projectiles, enemies, this, game);
             }
 
             // Check if triple shot duration has ended

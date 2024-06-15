@@ -85,14 +85,16 @@ namespace Space_Shooter
 
         public override void OnHit()
         {
-            base.OnHit();
+            
             hitCount++;
             if (hitCount >= 2)
             {
                 game.IncreaseScore(250);
-
+                base.OnHit();
             }
         }
+
+         
     }
 
     public enum Direction

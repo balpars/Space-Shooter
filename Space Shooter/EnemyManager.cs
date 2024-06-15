@@ -34,7 +34,7 @@ namespace Space_Shooter
         private uint lastBulletBoostSpawnTime;
         private uint lastShieldBoostSpawnTime;
         private int spawnInterval = 2000;
-        private int advancedEnemySpawnInterval = 25000; // 20 seconds interval for advanced enemies
+        private int advancedEnemySpawnInterval = 7000; // 20 seconds interval for advanced enemies
         private int rockSpawnInterval = 1500;
         private int healthBoostSpawnInterval = 10000; // 10 seconds interval
         private int bulletBoostSpawnInterval = 15000; // 15 seconds interval
@@ -82,10 +82,15 @@ namespace Space_Shooter
             for (int i = enemies.Count - 1; i >= 0; i--)
             {
                 enemies[i].Update();
-                if (enemies[i].GetRect().y > screenHeight || enemies[i].IsExpired())
+                if (enemies[i].GetRect().y > screenHeight || enemies[i].IsHit())
                 {
+                    enemies[i].Cleanup();
                     enemies.RemoveAt(i);
                 }
+
+                
+
+
             }
 
             for (int i = projectiles.Count - 1; i >= 0; i--)
@@ -102,6 +107,7 @@ namespace Space_Shooter
                 rocks[i].Update();
                 if (rocks[i].GetRect().y > screenHeight)
                 {
+                    rocks[i].Cleanup();
                     rocks.RemoveAt(i);
                 }
             }
@@ -133,7 +139,7 @@ namespace Space_Shooter
                 }
             }
 
-            CollisionManager.CheckCollisions(projectiles, enemies, player, game);
+            CollisionManager.CheckEnemyCollisions(projectiles, enemies, player, game);
             CollisionManager.CheckRockCollisions(rocks, player, game);
             CollisionManager.CheckHealthBoostCollisions(healthBoosts, player, game);
             CollisionManager.CheckBulletBoostCollisions(bulletBoosts, player, game);
@@ -145,7 +151,22 @@ namespace Space_Shooter
                 lastShootTime = currentTime;
             }
 
-            if (game.GetScore() >= 1000)
+
+            if (game.GetScore() >= 2000)
+            {
+                advancedEnemiesActive = true;
+                if (currentTime > lastAdvancedEnemySpawnTime + advancedEnemySpawnInterval)
+                {
+                    SpawnAdvancedEnemies();
+                    lastAdvancedEnemySpawnTime = currentTime;
+                }
+                if (currentTime > lastSpawnTime + spawnInterval)
+                {
+                    CreateEnemy();
+                    lastSpawnTime = currentTime;
+                }
+            }
+            else if (game.GetScore() >= 1000)
             {
                 advancedEnemiesActive = true;
                 if (currentTime > lastAdvancedEnemySpawnTime + advancedEnemySpawnInterval)
@@ -154,6 +175,7 @@ namespace Space_Shooter
                     lastAdvancedEnemySpawnTime = currentTime;
                 }
             }
+
             else
             {
                 advancedEnemiesActive = false;
@@ -163,6 +185,9 @@ namespace Space_Shooter
                     lastSpawnTime = currentTime;
                 }
             }
+
+
+
 
             if (currentTime > lastRockSpawnTime + rockSpawnInterval)
             {
