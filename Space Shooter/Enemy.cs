@@ -152,7 +152,21 @@ namespace Space_Shooter
             SDL.SDL_DestroyTexture(texture);
             SDL.SDL_DestroyTexture(hitTexture);
         }
+        public SDL.SDL_Rect GetCollisionRect()
+        {
+            // Return a smaller rectangle for collision detection
+            int collisionWidth = rect.w/3;
+            int collisionHeight = rect.h/2;
+            return new SDL.SDL_Rect
+            {
+                x = rect.x + (rect.w - collisionWidth) / 2,
+                y = rect.y + (rect.h - collisionHeight) / 2,
+                w = collisionWidth,
+                h = collisionHeight
+            };
+        }
     }
+   
 
     class BasicEnemy : Enemy
     {
@@ -168,7 +182,8 @@ namespace Space_Shooter
                 base.OnHit();
             }
         }
-
+        
+       
 
     }
 }

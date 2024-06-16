@@ -50,6 +50,9 @@ namespace Space_Shooter
         private IntPtr levelTexture;
         private uint levelTransitionStartTime;
         private bool isTransitioning;
+        private BossEnemy bossEnemy;
+        private bool bossSpawned;
+
 
         public Game()
         {
@@ -61,7 +64,7 @@ namespace Space_Shooter
             collisionEffects = new List<CollisionEffect>();
             projectiles = new List<Projectile>();
             gameState = GameState.TitleScreen;
-            score = 0; // HERE
+            score = 900; // HERE
             scoreTexture = IntPtr.Zero;
             highScoreTexture = IntPtr.Zero; // Initialize high score texture
             playerHealth = 5;
@@ -73,6 +76,8 @@ namespace Space_Shooter
             levelBackgrounds = new List<Background>();
             levelTransitionStartTime = 0;
             isTransitioning = false;
+            bossEnemy = null;
+            bossSpawned = false;
         }
 
         public enum Level
@@ -273,6 +278,12 @@ namespace Space_Shooter
                     highScore = score;
                     UpdateHighScoreTexture();
                 }
+
+                // Update the boss enemy if it exists
+                if (bossEnemy != null)
+                {
+                    bossEnemy.Update();
+                }
             }
         }
 
@@ -297,6 +308,12 @@ namespace Space_Shooter
                 RenderScore();
                 RenderHighScore();
                 RenderLevel(); // Render the current level
+
+                // Render the boss enemy if it exists
+                if (bossEnemy != null)
+                {
+                    bossEnemy.Render(renderer.RendererHandle);
+                }
 
                 // Render level transition if in progress
                 if (isTransitioning && SDL.SDL_GetTicks() - levelTransitionStartTime < 2000)
@@ -345,9 +362,9 @@ namespace Space_Shooter
             SDL.SDL_Rect transitionRect = new SDL.SDL_Rect
             {
                 x = (windowWidth - sdlSurface.w) / 2,
-                y = (windowHeight - sdlSurface.h) / 2,
-                w = sdlSurface.w,
-                h = sdlSurface.h
+                y = (windowHeight - sdlSurface.h) / 4,
+                w = sdlSurface.w+40,
+                h = sdlSurface.h+20
             };
 
             SDL.SDL_FreeSurface(surface);
@@ -363,6 +380,11 @@ namespace Space_Shooter
             if (score >= 6000)
             {
                 newLevel = Level.Level4;
+                if (!bossSpawned)
+                {
+                    //SpawnBossEnemy();
+                    bossSpawned = true;
+                }
             }
             else if (score >= 3000)
             {
@@ -385,6 +407,14 @@ namespace Space_Shooter
                 UpdateLevelTexture();
             }
         }
+        private void SpawnBossEnemy()
+        {
+            int bossSize = 100; // Adjust size as needed
+            int bossX = (windowWidth - bossSize) / 2;
+            int bossY = -bossSize;
+            bossEnemy = new BossEnemy(bossX, bossY, bossSize, renderer.RendererHandle, this);
+        }
+
         private void UpdateLevelTexture()
         {
             SDL.SDL_Color color = new SDL.SDL_Color { r = 255, g = 165, b = 0, a = 255 };
@@ -408,10 +438,10 @@ namespace Space_Shooter
 
             levelRect = new SDL.SDL_Rect
             {
-                x = windowWidth - sdlSurface.w - 10,
-                y = windowHeight - sdlSurface.h - 10,
-                w = sdlSurface.w,
-                h = sdlSurface.h
+                x = windowWidth - sdlSurface.w - 40,
+                y = windowHeight - sdlSurface.h - 20,
+                w = sdlSurface.w+10,
+                h = sdlSurface.h+10
             };
 
             SDL.SDL_FreeSurface(surface);
@@ -522,6 +552,16 @@ namespace Space_Shooter
         {
             return score;
         }
+        public Player GetPlayer()
+        {
+            return player;
+        }
+
+        public List<Projectile> GetProjectiles()
+        {
+            return projectiles;
+        }
+
 
         private void LoadHighScore()
         {

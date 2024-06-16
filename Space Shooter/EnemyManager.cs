@@ -1,6 +1,4 @@
-﻿// File: EnemyManager.cs
-
-using SDL2;
+﻿using SDL2;
 using System;
 using System.Collections.Generic;
 
@@ -34,22 +32,14 @@ namespace Space_Shooter
         private uint lastBulletBoostSpawnTime;
         private uint lastShieldBoostSpawnTime;
         private int spawnInterval = 2000;
-        private int advancedEnemySpawnInterval = 10000; // 10 seconds interval for advanced enemies
+        private int advancedEnemySpawnInterval = 7000; // 20 seconds interval for advanced enemies
         private int rockSpawnInterval = 1500;
         private int healthBoostSpawnInterval = 10000; // 10 seconds interval
         private int bulletBoostSpawnInterval = 15000; // 15 seconds interval
         private int shieldBoostSpawnInterval = 20000; // 20 seconds interval
 
         private bool isFastMode;
-        private int enemySequenceIndex = 0;
-        private EnemyType[] enemySequence = { EnemyType.Basic, EnemyType.Basic, EnemyType.Basic, EnemyType.Basic, EnemyType.Advanced };
-        private bool advancedEnemiesActive = false;
-
-        private enum EnemyType
-        {
-            Basic,
-            Advanced
-        }
+        private bool bossSpawned = false;
 
         public EnemyManager(IntPtr renderer, int screenWidth, int screenHeight, List<Enemy> enemies, Game game)
         {
@@ -87,10 +77,6 @@ namespace Space_Shooter
                     enemies[i].Cleanup();
                     enemies.RemoveAt(i);
                 }
-
-                
-
-
             }
 
             for (int i = projectiles.Count - 1; i >= 0; i--)
@@ -141,7 +127,6 @@ namespace Space_Shooter
 
             CollisionManager.CheckEnemyCollisions(this.projectiles, enemies, player, game);
             CollisionManager.CheckEnemyCollisions(player.GetProjectiles(), enemies, player, game);
-            //CollisionManager.CheckRockCollisions(rocks, projectiles, player, game);
             CollisionManager.CheckRockCollisions(rocks, player.GetProjectiles(), player, game);
             CollisionManager.CheckHealthBoostCollisions(healthBoosts, player, game);
             CollisionManager.CheckBulletBoostCollisions(bulletBoosts, player, game);
@@ -153,10 +138,18 @@ namespace Space_Shooter
                 lastShootTime = currentTime;
             }
 
-
-            if (game.GetScore() >= 2000)
+            if (game.GetScore() >= 6000)
             {
-                advancedEnemiesActive = true;
+                if (!bossSpawned)
+                {
+                    SpawnBoss();
+                    bossSpawned = true;
+                    // Remove all existing basic and advanced enemies
+                    enemies.RemoveAll(e => e is BasicEnemy || e is AdvancedEnemy);
+                }
+            }
+            else if (game.GetScore() >= 2000)
+            {
                 if (currentTime > lastAdvancedEnemySpawnTime + advancedEnemySpawnInterval)
                 {
                     SpawnAdvancedEnemies();
@@ -170,26 +163,20 @@ namespace Space_Shooter
             }
             else if (game.GetScore() >= 1000)
             {
-                advancedEnemiesActive = true;
                 if (currentTime > lastAdvancedEnemySpawnTime + advancedEnemySpawnInterval)
                 {
                     SpawnAdvancedEnemies();
                     lastAdvancedEnemySpawnTime = currentTime;
                 }
             }
-
             else
             {
-                advancedEnemiesActive = false;
                 if (currentTime > lastSpawnTime + spawnInterval)
                 {
                     CreateEnemy();
                     lastSpawnTime = currentTime;
                 }
             }
-
-
-
 
             if (currentTime > lastRockSpawnTime + rockSpawnInterval)
             {
@@ -279,6 +266,14 @@ namespace Space_Shooter
             }
         }
 
+        private void SpawnBoss()
+        {
+            int objectX = screenWidth / 2 - 100; // Center the boss horizontally
+            int objectY = -200; // Start the boss off-screen at the top
+            var boss = new BossEnemy(objectX, objectY, 200, renderer, game); // Create the boss enemy
+            enemies.Add(boss);
+        }
+
         private void CreateRock()
         {
             int rockX = random.Next(0, screenWidth - objectSize);
@@ -322,6 +317,10 @@ namespace Space_Shooter
                 if (!enemy.IsHit() && enemy is AdvancedEnemy advancedEnemy)
                 {
                     advancedEnemy.Shoot(projectiles);
+                }
+                else if (!enemy.IsHit() && enemy is BossEnemy bossEnemy)
+                {
+                    bossEnemy.Shoot(projectiles);
                 }
                 else
                 {

@@ -1,12 +1,11 @@
-﻿// File: Projectile.cs
-
-using SDL2;
+﻿using SDL2;
 
 namespace Space_Shooter
 {
     public class Projectile : GameObject
     {
-        protected string? assetPath;
+        public string? assetPath { get; set; }
+        public IntPtr texture { get; set; }
         public int Speed { get; set; } = 5;
         public int SpeedX { get; set; }
         public GameObject Owner { get; private set; }
@@ -48,6 +47,15 @@ namespace Space_Shooter
             : base(x, y, size, isUpwards, owner)
         {
             assetPath = "Assets/Projectiles/advanced_projectile.png"; // Path to your advanced projectile image
+        }
+    }
+
+    public class BossProjectile : Projectile
+    {
+        public BossProjectile(int x, int y, int size, bool isUpwards, GameObject owner)
+            : base(x, y, size, isUpwards, owner)
+        {
+            assetPath = "Assets/Bullets/boss_bullet.png"; // Path to your boss projectile image
         }
     }
 }

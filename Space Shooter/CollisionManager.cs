@@ -29,7 +29,7 @@ namespace Space_Shooter
 
 
                     // Player bullet to Enemy
-                    if (projectile.Owner != enemy && IsColliding(projectileRect, enemyRect))
+                    if (projectile.Owner != enemy && IsColliding(projectileRect, enemy.GetCollisionRect()))
                     {
                         int effectX = projectileRect.x - projectileRect.w / 2;
                         int effectY = projectileRect.y - projectileRect.h / 2;

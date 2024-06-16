@@ -1,6 +1,4 @@
-﻿// File: Renderer.cs
-
-using SDL2;
+﻿using SDL2;
 using System;
 
 namespace Space_Shooter
@@ -55,7 +53,7 @@ namespace Space_Shooter
                 if (player.GetAssetPath().Contains("protected_player.png"))
                 {
                     // Render the protected player asset at 60x60 size
-                    destRect = new SDL.SDL_Rect { x = player.PositionX+20, y = player.PositionY, w = 60, h = 60 };
+                    destRect = new SDL.SDL_Rect { x = player.PositionX + 20, y = player.PositionY, w = 60, h = 60 };
                 }
                 else
                 {

@@ -20,7 +20,7 @@ namespace Space_Shooter
         {
         }
 
-        public SDL.SDL_Rect GetRect()
+        public virtual SDL.SDL_Rect GetRect()
         {
             return rect;
         }
