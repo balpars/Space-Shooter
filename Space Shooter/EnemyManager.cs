@@ -148,7 +148,7 @@ namespace Space_Shooter
                     enemies.RemoveAll(e => e is BasicEnemy || e is AdvancedEnemy);
                 }
             }
-            else if (game.GetScore() >= 2000)
+            else if (game.GetScore() >= 3000)
             {
                 if (currentTime > lastAdvancedEnemySpawnTime + advancedEnemySpawnInterval)
                 {
@@ -353,5 +353,17 @@ namespace Space_Shooter
             bulletBoostSpawnInterval = isFast ? 10000 : 15000;
             shieldBoostSpawnInterval = isFast ? 10000 : 20000;
         }
+
+        public void ClearAllObjects()
+        {
+            enemies.Clear();
+            bossSpawned = false;
+            projectiles.Clear();
+            rocks.Clear();
+            healthBoosts.Clear();
+            bulletBoosts.Clear();
+            shieldBoosts.Clear();
+        }
+
     }
 }

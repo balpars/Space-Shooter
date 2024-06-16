@@ -77,6 +77,11 @@ namespace Space_Shooter
             tripleShotActive = false; // Initialize triple shot mode as inactive
         }
 
+        public void ClearProjectiles()
+        {
+            projectiles.Clear();
+        }
+
         public override void Update()
         {
             UpdateProjectiles();

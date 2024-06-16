@@ -11,7 +11,8 @@ namespace Space_Shooter
         TitleScreen,
         Playing,
         GameOver,
-        Story
+        Story,
+        Finished
     }
 }
 

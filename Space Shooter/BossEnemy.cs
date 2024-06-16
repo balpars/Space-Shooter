@@ -143,6 +143,7 @@ namespace Space_Shooter
             {
                 game.IncreaseScore(1000); // Reward for defeating the boss
                 base.OnHit();
+                game.GameFinished();
             }
         }
 

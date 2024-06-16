@@ -20,7 +20,6 @@ namespace Space_Shooter
         private List<Enemy> enemyList;
         private List<Background> backgrounds;
         private TitleScreen titleScreen;
-        private StoryScreen storyScreen;
         private List<CollisionEffect> collisionEffects;
         private List<Projectile> projectiles;
         public int windowWidth, windowHeight;
@@ -39,6 +38,7 @@ namespace Space_Shooter
         private IntPtr highScoreTexture; // High score texture
         private int playerHealth;
         private GameOver gameOver;
+        public GameOver gameFinished;
         private IntPtr gameOverSound;
         private bool scoreTransformed;
         private uint scoreTransformStartTime;
@@ -73,7 +73,7 @@ namespace Space_Shooter
             collisionEffects = new List<CollisionEffect>();
             projectiles = new List<Projectile>();
             gameState = GameState.TitleScreen;
-            score = 6000; // HERE
+            score = 5900; // HERE
             scoreTexture = IntPtr.Zero;
             highScoreTexture = IntPtr.Zero; // Initialize high score texture
             playerHealth = 5;
@@ -144,8 +144,6 @@ namespace Space_Shooter
             titleScreen = new TitleScreen("Assets/TitleScreen/title_screen.png", renderer.RendererHandle);
             titleScreen.SetFullScreen(windowWidth, windowHeight);
 
-            storyScreen = new StoryScreen("Assets/StoryScreen/story_screen.png", renderer.RendererHandle, windowWidth, windowHeight);
-
             backgroundMusic = SDL_mixer.Mix_LoadMUS("Assets/Sounds/background_music.mp3");
             if (backgroundMusic == IntPtr.Zero)
             {
@@ -180,6 +178,8 @@ namespace Space_Shooter
             UpdateLevelTexture(); // Update level texture to show the current level
 
             gameOver = new GameOver("Assets/GameOver/game_over.png", renderer.RendererHandle, windowWidth, windowHeight);
+            gameFinished = new GameOver("Assets/GameOver/game_finished.png", renderer.RendererHandle, windowWidth, windowHeight);
+
         }
 
 
@@ -228,16 +228,21 @@ namespace Space_Shooter
                     {
                         if (gameState == GameState.TitleScreen)
                         {
-                            gameState = GameState.Story;
-                        }
-                        else if (gameState == GameState.Story)
-                        {
                             gameState = GameState.Playing;
+
+                            //gameState = GameState.Story;
+                        }
+                        else if (gameState == GameState.Finished)
+                        {
+                            RestartGame();
                         }
                         else if (gameState == GameState.GameOver)
                         {
                             RestartGame();
                         }
+                      
+
+
                     }
                 }
                 else if (e.type == SDL.SDL_EventType.SDL_CONTROLLERBUTTONDOWN)
@@ -249,9 +254,9 @@ namespace Space_Shooter
                         {
                             gameState = GameState.Story;
                         }
-                        else if (gameState == GameState.Story)
+                        else if (gameState == GameState.Finished)
                         {
-                            gameState = GameState.Playing;
+                            RestartGame();
                         }
                         else if (gameState == GameState.GameOver)
                         {
@@ -314,11 +319,6 @@ namespace Space_Shooter
             {
                 titleScreen.Render(renderer.RendererHandle);
             }
-            else if (gameState == GameState.Story)
-            {
-                storyScreen.Render(renderer.RendererHandle);
-                Renderer.RenderTextLetterByLetter(renderer.RendererHandle, font, "Hello World", 250, 250, ref currentText, ref currentIndex, delay, ref lastTime);
-            }
             else if (gameState == GameState.Playing)
             {
                 // Render the current level background
@@ -353,6 +353,12 @@ namespace Space_Shooter
             {
                 gameOver.Render(renderer.RendererHandle);
             }
+            else if (gameState == GameState.Finished)
+            {
+                gameFinished.Render(renderer.RendererHandle);
+            }
+
+
 
             renderer.Present();
         }
@@ -426,21 +432,15 @@ namespace Space_Shooter
 
             if (newLevel != currentLevel)
             {
-                gameState = GameState.Story;
+                //gameState = GameState.Story;
                 currentLevel = newLevel;
                 isTransitioning = true;
-                
+                ClearAllGameObjects(); // Clear all objects during level transition 
                 levelTransitionStartTime = SDL.SDL_GetTicks();
                 UpdateLevelTexture();
             }
         }
-        private void SpawnBossEnemy()
-        {
-            int bossSize = 100; // Adjust size as needed
-            int bossX = (windowWidth - bossSize) / 2;
-            int bossY = -bossSize;
-            bossEnemy = new BossEnemy(bossX, bossY, bossSize, renderer.RendererHandle, this);
-        }
+
 
         private void UpdateLevelTexture()
         {
@@ -465,7 +465,7 @@ namespace Space_Shooter
 
             levelRect = new SDL.SDL_Rect
             {
-                x = windowWidth - sdlSurface.w - 40,
+                x = (windowWidth - sdlSurface.w) /2,
                 y = windowHeight - sdlSurface.h - 20,
                 w = sdlSurface.w+10,
                 h = sdlSurface.h+10
@@ -635,7 +635,6 @@ namespace Space_Shooter
                 bg.Cleanup();
             }
             titleScreen.Cleanup();
-            storyScreen.Cleanup();
             renderer.Cleanup();
 
             foreach (var effect in collisionEffects)
@@ -685,6 +684,13 @@ namespace Space_Shooter
             gameState = GameState.GameOver;
             SoundManager.PlaySound(gameOverSound);
         }
+        public void GameFinished()
+        {
+            gameState = GameState.Finished;
+            SoundManager.PlaySound(healthBoostSound);
+        }
+
+
 
         private void RestartGame()
         {
@@ -698,5 +704,15 @@ namespace Space_Shooter
             UpdateScoreTexture();
             gameState = GameState.Playing;
         }
+
+        private void ClearAllGameObjects()
+        {
+            enemyList.Clear();
+            projectiles.Clear();
+            collisionEffects.Clear();
+            player.ClearProjectiles();
+            enemyManager.ClearAllObjects();
+        }
+
     }
 }

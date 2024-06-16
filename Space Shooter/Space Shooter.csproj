@@ -15,10 +15,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Assets\Background\level2.png">
+    <None Update="Assets\Background\level1.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\Background\level1.png">
+    <None Update="Assets\Background\level2.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Assets\Background\level3.png">
@@ -50,6 +50,9 @@
     </None>
     <None Update="Assets\Fonts\arial.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\GameOver\game_finished.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Assets\GameOver\game_over.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
