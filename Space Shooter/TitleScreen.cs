@@ -39,13 +39,4 @@ namespace Space_Shooter
         }
     }
 
-
-    class StoryScreen : TitleScreen
-    {
-        private IntPtr texture;
-        private SDL.SDL_Rect destRect;
-
-        public StoryScreen(string assetPath, IntPtr renderer) : base(assetPath, renderer) { }
-    }
-
 }

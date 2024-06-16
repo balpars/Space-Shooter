@@ -38,4 +38,16 @@ namespace Space_Shooter
             SDL.SDL_DestroyTexture(texture);
         }
     }
+
+    class StoryScreen : GameOver
+    {
+        private IntPtr texture;
+        private SDL.SDL_Rect destRect;
+
+        public StoryScreen(string assetPath, IntPtr renderer, int screenWidth, int screenHeight) : base(assetPath, renderer, screenWidth, screenHeight)
+        {
+
+        }
+    }
+
 }

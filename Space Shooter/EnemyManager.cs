@@ -149,7 +149,7 @@ namespace Space_Shooter
             }
 
 
-            if (game.GetScore() >= 2000)
+            if (game.GetScore() >= 3000)
             {
                 advancedEnemiesActive = true;
                 if (currentTime > lastAdvancedEnemySpawnTime + advancedEnemySpawnInterval)
@@ -263,7 +263,7 @@ namespace Space_Shooter
                 {
                     0 => Direction.RightDiagonal,
                     1 => Direction.LeftDiagonal,
-                    _ => Direction.Straight
+                    //_ => Direction.Straight
                 };
                 int moveDirection = i == 0 ? 1 : -1; // First enemy moves right, second moves left
                 var enemy = new AdvancedEnemy(objectX, objectY, advancedObjectSize, renderer, moveDirection * 2, 0, game, direction); // Set initial horizontal speed

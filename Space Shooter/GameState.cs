@@ -10,7 +10,8 @@ namespace Space_Shooter
     {
         TitleScreen,
         Playing,
-        GameOver
+        GameOver,
+        Story
     }
 }
 
