@@ -87,10 +87,6 @@ namespace Space_Shooter
                     enemies[i].Cleanup();
                     enemies.RemoveAt(i);
                 }
-
-                
-
-
             }
 
             for (int i = projectiles.Count - 1; i >= 0; i--)
@@ -139,9 +135,8 @@ namespace Space_Shooter
                 }
             }
 
-            CollisionManager.CheckEnemyCollisions(this.projectiles, enemies, player, game);
-            CollisionManager.CheckEnemyCollisions(player.GetProjectiles(), enemies, player, game);
-            //CollisionManager.CheckRockCollisions(rocks, projectiles, player, game);
+            CollisionManager.CheckEnemyCollisions(projectiles, enemies, player, game); // Enemy projectile to Player
+            CollisionManager.CheckEnemyCollisions(player.GetProjectiles(), enemies, player, game); // Player projectile to Enemy
             CollisionManager.CheckRockCollisions(rocks, player.GetProjectiles(), player, game);
             CollisionManager.CheckHealthBoostCollisions(healthBoosts, player, game);
             CollisionManager.CheckBulletBoostCollisions(bulletBoosts, player, game);
@@ -187,9 +182,6 @@ namespace Space_Shooter
                     lastSpawnTime = currentTime;
                 }
             }
-
-
-
 
             if (currentTime > lastRockSpawnTime + rockSpawnInterval)
             {

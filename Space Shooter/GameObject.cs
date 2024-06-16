@@ -30,5 +30,7 @@ namespace Space_Shooter
             rect.x += deltaX;
             rect.y += deltaY;
         }
+
+
     }
 }

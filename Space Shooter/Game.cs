@@ -472,7 +472,7 @@ namespace Space_Shooter
             SoundManager.PlaySound(collisionSound);
         }
 
-        public void PlayHealthBoostSound() // Add this method
+        public void PlayHealthBoostSound()
         {
             SoundManager.PlaySound(healthBoostSound);
         }

@@ -41,10 +41,10 @@ namespace Space_Shooter
             flashInterval = 500;
             isVisible = true;
 
-            if (SDL_image.IMG_Init(SDL_image.IMG_InitFlags.IMG_INIT_PNG) == 0)
-            {
-                Console.WriteLine($"Failed to initialize SDL_image! SDL_image Error: {SDL.SDL_GetError()}");
-            }
+            //if (SDL_image.IMG_Init(SDL_image.IMG_InitFlags.IMG_INIT_PNG) == 0)
+            //{
+            //    Console.WriteLine($"Failed to initialize SDL_image! SDL_image Error: {SDL.SDL_GetError()}");
+            //}
 
             assetPath = "Assets/Enemy/enemy.png";
             texture = SDL_image.IMG_LoadTexture(renderer, assetPath);
@@ -168,7 +168,5 @@ namespace Space_Shooter
                 base.OnHit();
             }
         }
-
-
     }
 }

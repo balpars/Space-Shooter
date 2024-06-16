@@ -14,7 +14,7 @@ namespace Space_Shooter
         private bool isStaying;
         private int moveDirection;
         private int moveSpeed = 2; // Speed of lateral movement
-        private int hitCount; // Count of hits
+        private int hitCount;
 
         public AdvancedEnemy(int x, int y, int size, IntPtr renderer, int speedX, int speedY, Game game, Direction shootDirection)
             : base(x, y, size, renderer, 250, speedX, speedY, game) // Points set to 250
@@ -29,7 +29,7 @@ namespace Space_Shooter
             this.stayStartTime = SDL.SDL_GetTicks();
             this.isStaying = true;
             this.moveDirection = speedX > 0 ? 1 : -1; // Set initial direction based on speedX
-            this.hitCount = 0; // Initialize hit count
+            this.hitCount = 0; 
         }
 
         public override void Update()
@@ -93,8 +93,6 @@ namespace Space_Shooter
                 base.OnHit();
             }
         }
-
-         
     }
 
     public enum Direction

@@ -137,10 +137,10 @@ namespace Space_Shooter
             {
                 // Reduce health or handle player hit logic
                 UpdateHealth(-1);
-                if (Health <= 0)
-                {
-                    game.GameOver();
-                }
+                //if (Health <= 0)
+                //{
+                //    game.GameOver();
+                //}
             }
         }
 
