@@ -13,7 +13,7 @@ namespace Space_Shooter
         private List<SDL.SDL_Point> positions;
         private SDL.SDL_Point currentPosition;
         private SDL.SDL_Point targetPosition;
-        private int shootInterval = 1000; // Shoot every second
+        private int shootInterval = 1500; // Shoot every second
         private uint lastShootTime;
         private Direction shootDirection;
 
@@ -27,7 +27,7 @@ namespace Space_Shooter
                 Console.WriteLine($"Unable to load texture {assetPath}! SDL_Error: {SDL.SDL_GetError()}");
             }
             this.game = game;
-            this.health = 20; // Boss health set to 10
+            this.health = 10; // Boss health set to 10
             this.movePhase = 0;
             this.phaseStartTime = SDL.SDL_GetTicks();
             this.shootDirection = Direction.Straight; // Initialize shoot direction
