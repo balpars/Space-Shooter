@@ -149,7 +149,7 @@ namespace Space_Shooter
 
                 if (IsColliding(healthBoostRect, player.GetCollisionRect()))
                 {
-                    healthBoosts.RemoveAt(i);
+                    healthBoosts.RemoveAt(i);   
                     game.PlayHealthBoostSound(); // Play health boost sound
                     player.UpdateHealth(1); // Increase health by 1
                 }

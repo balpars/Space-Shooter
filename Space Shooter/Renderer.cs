@@ -101,5 +101,35 @@ namespace Space_Shooter
         {
             return this.renderer;
         }
+
+        public static void RenderText(IntPtr renderer, IntPtr font, string text, int x, int y)
+        {
+            SDL.SDL_Color color = new SDL.SDL_Color { r = 255, g = 255, b = 255, a = 255 };
+            IntPtr surface = SDL_ttf.TTF_RenderText_Solid(font, text, color);
+            IntPtr texture = SDL.SDL_CreateTextureFromSurface(renderer, surface);
+
+            SDL.SDL_QueryTexture(texture, out _, out _, out int width, out int height);
+            SDL.SDL_Rect dstRect = new SDL.SDL_Rect { x = x, y = y, w = width, h = height };
+
+            SDL.SDL_RenderCopy(renderer, texture, IntPtr.Zero, ref dstRect);
+
+            SDL.SDL_FreeSurface(surface);
+            SDL.SDL_DestroyTexture(texture);
+        }
+
+        public static void RenderTextLetterByLetter(IntPtr renderer, IntPtr font, string text, int x, int y, ref string currentText, ref int currentIndex, int delay, ref uint lastTime)
+        {
+            uint currentTime = SDL.SDL_GetTicks();
+            if (currentTime - lastTime >= delay && currentIndex < text.Length)
+            {
+                currentText += text[currentIndex];
+                currentIndex++;
+                lastTime = currentTime;
+            }
+
+            RenderText(renderer, font, currentText, x, y);
+        }
+
+
     }
 }

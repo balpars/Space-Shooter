@@ -7,16 +7,16 @@ namespace Space_Shooter
 {
     public class ShieldBoost : GameObject
     {
-        private IntPtr renderer;
+        //private IntPtr renderer;
         private IntPtr texture;
         private int speed;
         private double angle;
 
         public ShieldBoost(int x, int y, int size, IntPtr renderer, int speed) : base(x, y, size, size)
         {
-            this.renderer = renderer;
+            //this.renderer = renderer;
             this.speed = speed;
-            this.angle = 0;
+            //this.angle = 0;
 
             if (SDL_image.IMG_Init(SDL_image.IMG_InitFlags.IMG_INIT_PNG) == 0)
             {

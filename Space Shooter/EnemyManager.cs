@@ -152,6 +152,7 @@ namespace Space_Shooter
             {
                 if (currentTime > lastAdvancedEnemySpawnTime + advancedEnemySpawnInterval)
                 {
+                    SpawnBossEnemy();
                     SpawnAdvancedEnemies();
                     lastAdvancedEnemySpawnTime = currentTime;
                 }
@@ -258,10 +259,29 @@ namespace Space_Shooter
                 {
                     0 => Direction.RightDiagonal,
                     1 => Direction.LeftDiagonal,
-                    _ => Direction.Straight
+                    //_ => Direction.Straight
                 };
                 int moveDirection = i == 0 ? 1 : -1; // First enemy moves right, second moves left
                 var enemy = new AdvancedEnemy(objectX, objectY, advancedObjectSize, renderer, moveDirection * 2, 0, game, direction); // Set initial horizontal speed
+                enemies.Add(enemy);
+            }
+        }
+
+        private void SpawnBossEnemy()
+        {
+            int spacing = screenWidth / 3; // Change to divide screen width into three parts
+            for (int i = 0; i < 2; i++) // Loop for only two enemies
+            {
+                int objectX = spacing * (i + 1) - advancedObjectSize / 2; // Adjust for larger size and new spacing
+                int objectY = 0;
+                Direction direction = i switch
+                {
+                    0 => Direction.RightDiagonal,
+                    1 => Direction.LeftDiagonal,
+                    _ => Direction.Straight
+                };
+                int moveDirection = i == 0 ? 1 : -1; // First enemy moves right, second moves left
+                var enemy = new BossEnemy(objectX, objectY, advancedObjectSize, renderer, moveDirection * 2, 0, game, direction); // Set initial horizontal speed
                 enemies.Add(enemy);
             }
         }

@@ -20,6 +20,7 @@ namespace Space_Shooter
         private List<Enemy> enemyList;
         private List<Background> backgrounds;
         private TitleScreen titleScreen;
+        private StoryScreen storyScreen;
         private List<CollisionEffect> collisionEffects;
         private List<Projectile> projectiles;
         public int windowWidth, windowHeight;
@@ -52,6 +53,14 @@ namespace Space_Shooter
         private bool isTransitioning;
         private BossEnemy bossEnemy;
         private bool bossSpawned;
+
+
+
+        // Story Texts
+        private string currentText = "";
+        private int currentIndex = 0;
+        private int delay = 100; // Delay in milliseconds between each letter
+        private uint lastTime = 0;
 
 
         public Game()
@@ -135,6 +144,8 @@ namespace Space_Shooter
             titleScreen = new TitleScreen("Assets/TitleScreen/title_screen.png", renderer.RendererHandle);
             titleScreen.SetFullScreen(windowWidth, windowHeight);
 
+            storyScreen = new StoryScreen("Assets/StoryScreen/story_screen.png", renderer.RendererHandle, windowWidth, windowHeight);
+
             backgroundMusic = SDL_mixer.Mix_LoadMUS("Assets/Sounds/background_music.mp3");
             if (backgroundMusic == IntPtr.Zero)
             {
@@ -217,6 +228,10 @@ namespace Space_Shooter
                     {
                         if (gameState == GameState.TitleScreen)
                         {
+                            gameState = GameState.Story;
+                        }
+                        else if (gameState == GameState.Story)
+                        {
                             gameState = GameState.Playing;
                         }
                         else if (gameState == GameState.GameOver)
@@ -231,6 +246,10 @@ namespace Space_Shooter
                         e.cbutton.button == (byte)SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_X)
                     {
                         if (gameState == GameState.TitleScreen)
+                        {
+                            gameState = GameState.Story;
+                        }
+                        else if (gameState == GameState.Story)
                         {
                             gameState = GameState.Playing;
                         }
@@ -294,6 +313,11 @@ namespace Space_Shooter
             if (gameState == GameState.TitleScreen)
             {
                 titleScreen.Render(renderer.RendererHandle);
+            }
+            else if (gameState == GameState.Story)
+            {
+                storyScreen.Render(renderer.RendererHandle);
+                Renderer.RenderTextLetterByLetter(renderer.RendererHandle, font, "Hello World", 250, 250, ref currentText, ref currentIndex, delay, ref lastTime);
             }
             else if (gameState == GameState.Playing)
             {
@@ -376,6 +400,7 @@ namespace Space_Shooter
         private void UpdateLevel()
         {
             Level newLevel = currentLevel;
+           
 
             if (score >= 6000)
             {
@@ -401,8 +426,10 @@ namespace Space_Shooter
 
             if (newLevel != currentLevel)
             {
+                gameState = GameState.Story;
                 currentLevel = newLevel;
                 isTransitioning = true;
+                
                 levelTransitionStartTime = SDL.SDL_GetTicks();
                 UpdateLevelTexture();
             }
@@ -608,6 +635,7 @@ namespace Space_Shooter
                 bg.Cleanup();
             }
             titleScreen.Cleanup();
+            storyScreen.Cleanup();
             renderer.Cleanup();
 
             foreach (var effect in collisionEffects)
@@ -642,7 +670,7 @@ namespace Space_Shooter
             SoundManager.PlaySound(collisionSound);
         }
 
-        public void PlayHealthBoostSound() // Add this method
+        public void PlayHealthBoostSound()
         {
             SoundManager.PlaySound(healthBoostSound);
         }

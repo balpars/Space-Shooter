@@ -1,4 +1,6 @@
-﻿using SDL2;
+﻿// File: BossEnemy.cs
+
+using SDL2;
 using System;
 using System.Collections.Generic;
 
@@ -16,6 +18,12 @@ namespace Space_Shooter
         private int shootInterval = 1500; // Shoot every second
         private uint lastShootTime;
         private Direction shootDirection;
+        private uint stayDuration = 20000; // 20 seconds in milliseconds
+        private uint stayStartTime;
+        private bool isStaying;
+        private int moveDirection;
+        private int moveSpeed = 2; // Speed of lateral movement
+        private int hitCount;
 
         public BossEnemy(int x, int y, int size, IntPtr renderer, Game game)
             : base(x, y, size, renderer, 0, 0, 0, game) // Points set to 0 since boss isn't defeated in one hit
@@ -83,15 +91,15 @@ namespace Space_Shooter
         {
             int speed = 2;
             if (currentPosition.x < targetPosition.x)
-            {
+                    {
                 currentPosition.x += speed;
                 if (currentPosition.x > targetPosition.x) currentPosition.x = targetPosition.x;
-            }
+                    }
             else if (currentPosition.x > targetPosition.x)
             {
                 currentPosition.x -= speed;
                 if (currentPosition.x < targetPosition.x) currentPosition.x = targetPosition.x;
-            }
+                }
 
             if (currentPosition.y < targetPosition.y)
             {
