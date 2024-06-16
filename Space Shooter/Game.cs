@@ -73,7 +73,7 @@ namespace Space_Shooter
             collisionEffects = new List<CollisionEffect>();
             projectiles = new List<Projectile>();
             gameState = GameState.TitleScreen;
-            score = 0; // HERE
+            score = 6000; // HERE
             scoreTexture = IntPtr.Zero;
             highScoreTexture = IntPtr.Zero; // Initialize high score texture
             playerHealth = 5;
