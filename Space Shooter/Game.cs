@@ -44,6 +44,12 @@ namespace Space_Shooter
         private uint scoreTransformDuration = 500; // Duration in milliseconds
         private bool isFastMode; // To track if fast mode is activated
         private List<ShieldBoost> shieldBoosts;
+        private Level currentLevel;
+        private List<Background> levelBackgrounds;
+        private SDL.SDL_Rect levelRect;
+        private IntPtr levelTexture;
+        private uint levelTransitionStartTime;
+        private bool isTransitioning;
 
         public Game()
         {
@@ -55,7 +61,7 @@ namespace Space_Shooter
             collisionEffects = new List<CollisionEffect>();
             projectiles = new List<Projectile>();
             gameState = GameState.TitleScreen;
-            score = 1900; // HERE
+            score = 0; // HERE
             scoreTexture = IntPtr.Zero;
             highScoreTexture = IntPtr.Zero; // Initialize high score texture
             playerHealth = 5;
@@ -63,6 +69,18 @@ namespace Space_Shooter
             scoreTransformStartTime = 0;
             isFastMode = false;
             shieldBoosts = new List<ShieldBoost>();
+            currentLevel = Level.Level1;
+            levelBackgrounds = new List<Background>();
+            levelTransitionStartTime = 0;
+            isTransitioning = false;
+        }
+
+        public enum Level
+        {
+            Level1,
+            Level2,
+            Level3,
+            Level4
         }
 
         public void Init(string title, int width, int height)
@@ -103,8 +121,11 @@ namespace Space_Shooter
             player = new Player(renderer.RendererHandle, windowWidth, windowHeight, enemyList, this, playerHealth);
             enemyManager = new EnemyManager(renderer.RendererHandle, windowWidth, windowHeight, enemyList, this);
 
-            var bg = new Background("Assets/Background/background_1.png", renderer.RendererHandle, 1, windowWidth, windowHeight);
-            backgrounds.Add(bg);
+            // Load backgrounds for each level with different speeds
+            levelBackgrounds.Add(new Background("Assets/Background/level1.png", renderer.RendererHandle, 1, windowWidth, windowHeight));
+            levelBackgrounds.Add(new Background("Assets/Background/level2.png", renderer.RendererHandle, 2, windowWidth, windowHeight));
+            levelBackgrounds.Add(new Background("Assets/Background/level3.png", renderer.RendererHandle, 3, windowWidth, windowHeight));
+            levelBackgrounds.Add(new Background("Assets/Background/level4.png", renderer.RendererHandle, 4, windowWidth, windowHeight));
 
             titleScreen = new TitleScreen("Assets/TitleScreen/title_screen.png", renderer.RendererHandle);
             titleScreen.SetFullScreen(windowWidth, windowHeight);
@@ -140,9 +161,11 @@ namespace Space_Shooter
 
             UpdateScoreTexture();
             UpdateHighScoreTexture(); // Update high score texture
+            UpdateLevelTexture(); // Update level texture to show the current level
 
             gameOver = new GameOver("Assets/GameOver/game_over.png", renderer.RendererHandle, windowWidth, windowHeight);
         }
+
 
         public void Run()
         {
@@ -226,23 +249,16 @@ namespace Space_Shooter
             {
                 player.Update();
                 enemyManager.Update(player);
-                //CollisionManager.CheckEnemyCollisions(player.GetProjectiles(), enemyList, player, this);
                 UpdateCollisionEffects();
-                foreach (var bg in backgrounds)
+
+                // Update the background speed based on the current level
+                foreach (var bg in levelBackgrounds)
                 {
                     bg.Update();
                 }
 
-                // Activate fast mode if score > 1000 and not already activated
-                if (score > 1000 && !isFastMode)
-                {
-                    isFastMode = true;
-                    enemyManager.SetFastMode(true);
-                    foreach (var bg in backgrounds)
-                    {
-                        bg.SetFastMode(true);
-                    }
-                }
+                // Update level based on the score
+                UpdateLevel();
 
                 // Handle score transformation timing
                 if (scoreTransformed && SDL.SDL_GetTicks() - scoreTransformStartTime > scoreTransformDuration)
@@ -270,20 +286,26 @@ namespace Space_Shooter
             }
             else if (gameState == GameState.Playing)
             {
-                foreach (var bg in backgrounds)
-                {
-                    bg.Render(renderer.RendererHandle);
-                }
+                // Render the current level background
+                levelBackgrounds[(int)currentLevel].Render(renderer.RendererHandle);
+
                 renderer.Draw(player);
                 player.RenderProjectiles(renderer);
                 player.RenderHearts(renderer);
                 enemyManager.Render(renderer);
                 RenderCollisionEffects();
                 RenderScore();
-                RenderHighScore(); // Render high score
-                foreach (var shieldBoost in shieldBoosts)
+                RenderHighScore();
+                RenderLevel(); // Render the current level
+
+                // Render level transition if in progress
+                if (isTransitioning && SDL.SDL_GetTicks() - levelTransitionStartTime < 2000)
                 {
-                    shieldBoost.Render(renderer.RendererHandle);
+                    RenderLevelTransition();
+                }
+                else
+                {
+                    isTransitioning = false;
                 }
             }
             else if (gameState == GameState.GameOver)
@@ -293,6 +315,114 @@ namespace Space_Shooter
 
             renderer.Present();
         }
+
+        private void RenderLevel()
+        {
+            SDL.SDL_RenderCopy(renderer.RendererHandle, levelTexture, IntPtr.Zero, ref levelRect);
+        }
+
+        private void RenderLevelTransition()
+        {
+            SDL.SDL_Color color = new SDL.SDL_Color { r = 255, g = 0, b = 0, a = 255 };
+            IntPtr surface = SDL_ttf.TTF_RenderText_Solid(font, $"{currentLevel}", color);
+
+            if (surface == IntPtr.Zero)
+            {
+                Console.WriteLine($"Failed to create surface for level transition text! SDL_ttf Error: {SDL.SDL_GetError()}");
+                return;
+            }
+
+            IntPtr texture = SDL.SDL_CreateTextureFromSurface(renderer.RendererHandle, surface);
+            if (texture == IntPtr.Zero)
+            {
+                Console.WriteLine($"Failed to create texture for level transition text! SDL_Error: {SDL.SDL_GetError()}");
+                SDL.SDL_FreeSurface(surface);
+                return;
+            }
+
+            SDL.SDL_Surface sdlSurface = Marshal.PtrToStructure<SDL.SDL_Surface>(surface);
+
+            SDL.SDL_Rect transitionRect = new SDL.SDL_Rect
+            {
+                x = (windowWidth - sdlSurface.w) / 2,
+                y = (windowHeight - sdlSurface.h) / 2,
+                w = sdlSurface.w,
+                h = sdlSurface.h
+            };
+
+            SDL.SDL_FreeSurface(surface);
+
+            SDL.SDL_RenderCopy(renderer.RendererHandle, texture, IntPtr.Zero, ref transitionRect);
+            SDL.SDL_DestroyTexture(texture);
+        }
+
+        private void UpdateLevel()
+        {
+            Level newLevel = currentLevel;
+
+            if (score >= 6000)
+            {
+                newLevel = Level.Level4;
+            }
+            else if (score >= 3000)
+            {
+                newLevel = Level.Level3;
+            }
+            else if (score >= 1000)
+            {
+                newLevel = Level.Level2;
+            }
+            else
+            {
+                newLevel = Level.Level1;
+            }
+
+            if (newLevel != currentLevel)
+            {
+                currentLevel = newLevel;
+                isTransitioning = true;
+                levelTransitionStartTime = SDL.SDL_GetTicks();
+                UpdateLevelTexture();
+            }
+        }
+        private void UpdateLevelTexture()
+        {
+            SDL.SDL_Color color = new SDL.SDL_Color { r = 255, g = 165, b = 0, a = 255 };
+            IntPtr surface = SDL_ttf.TTF_RenderText_Solid(font, $"{currentLevel}", color);
+
+            if (surface == IntPtr.Zero)
+            {
+                Console.WriteLine($"Failed to create surface for level text! SDL_ttf Error: {SDL.SDL_GetError()}");
+                return;
+            }
+
+            IntPtr texture = SDL.SDL_CreateTextureFromSurface(renderer.RendererHandle, surface);
+            if (texture == IntPtr.Zero)
+            {
+                Console.WriteLine($"Failed to create texture for level text! SDL_Error: {SDL.SDL_GetError()}");
+                SDL.SDL_FreeSurface(surface);
+                return;
+            }
+
+            SDL.SDL_Surface sdlSurface = Marshal.PtrToStructure<SDL.SDL_Surface>(surface);
+
+            levelRect = new SDL.SDL_Rect
+            {
+                x = windowWidth - sdlSurface.w - 10,
+                y = windowHeight - sdlSurface.h - 10,
+                w = sdlSurface.w,
+                h = sdlSurface.h
+            };
+
+            SDL.SDL_FreeSurface(surface);
+
+            if (levelTexture != IntPtr.Zero)
+            {
+                SDL.SDL_DestroyTexture(levelTexture);
+            }
+            levelTexture = texture;
+        }
+
 
         private void UpdateScoreTexture()
         {

@@ -33,18 +33,15 @@ namespace Space_Shooter
 
         public void Update()
         {
-            // Move the backgrounds down by speed
             int actualSpeed = isFastMode ? speed * 2 : speed; // Double the speed if in fast mode
             destRect1.y += actualSpeed;
             destRect2.y += actualSpeed;
 
-            // If the first background moved fully below the screen, reset its position
             if (destRect1.y >= screenHeight)
             {
                 destRect1.y = destRect2.y - screenHeight;
             }
 
-            // If the second background moved fully below the screen, reset its position
             if (destRect2.y >= screenHeight)
             {
                 destRect2.y = destRect1.y - screenHeight;
@@ -62,9 +59,15 @@ namespace Space_Shooter
             isFastMode = isFast;
         }
 
+        public void SetSpeed(int newSpeed)
+        {
+            speed = newSpeed;
+        }
+
         public void Cleanup()
         {
             SDL.SDL_DestroyTexture(texture);
         }
     }
+
 }
