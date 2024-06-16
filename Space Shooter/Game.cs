@@ -73,7 +73,7 @@ namespace Space_Shooter
             collisionEffects = new List<CollisionEffect>();
             projectiles = new List<Projectile>();
             gameState = GameState.TitleScreen;
-            score = 5900; // HERE
+            score = 0; // HERE
             scoreTexture = IntPtr.Zero;
             highScoreTexture = IntPtr.Zero; // Initialize high score texture
             playerHealth = 5;
@@ -252,7 +252,9 @@ namespace Space_Shooter
                     {
                         if (gameState == GameState.TitleScreen)
                         {
-                            gameState = GameState.Story;
+                            gameState = GameState.Playing;
+
+                            //gameState = GameState.Story;
                         }
                         else if (gameState == GameState.Finished)
                         {
@@ -433,6 +435,8 @@ namespace Space_Shooter
             if (newLevel != currentLevel)
             {
                 //gameState = GameState.Story;
+                player.UpdateHealth(1);
+                SoundManager.PlaySound(healthBoostSound);
                 currentLevel = newLevel;
                 isTransitioning = true;
                 ClearAllGameObjects(); // Clear all objects during level transition 

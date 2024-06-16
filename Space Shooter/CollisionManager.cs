@@ -125,7 +125,7 @@ namespace Space_Shooter
                     var projectile = projectiles[j];
                     var projectileRect = projectile.GetRect();
                     
-                    if (projectile.Owner == player && IsColliding(projectileRect, rockRect))
+                    if (IsColliding(projectileRect, rockRect))
                     {
                         int effectX = projectileRect.x - projectileRect.w / 2;
                         int effectY = projectileRect.y - projectileRect.h / 2;
