@@ -34,9 +34,9 @@ namespace Space_Shooter
         private int spawnInterval = 2000;
         private int advancedEnemySpawnInterval = 7000; // 7 seconds interval for advanced enemies
         private int rockSpawnInterval = 1500;
-        private int healthBoostSpawnInterval = 1000; // 10 seconds interval
+        private int healthBoostSpawnInterval = 10000; // 10 seconds interval
         private int bulletBoostSpawnInterval = 15000; // 15 seconds interval
-        private int shieldBoostSpawnInterval = 2000; // 20 seconds interval
+        private int shieldBoostSpawnInterval = 20000; // 20 seconds interval
         private bool isFastMode;
         private bool bossSpawned = false;
 
