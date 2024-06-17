@@ -20,7 +20,7 @@ namespace Space_Shooter
                 Console.WriteLine($"Failed to initialize SDL_image! SDL_image Error: {SDL.SDL_GetError()}");
             }
 
-            string assetPath = "Assets/BulletBoost/bullet_boost.png"; // Path to your bullet boost image
+            string assetPath = "Assets/BulletBoost/bullet_boost.png";
             texture = SDL_image.IMG_LoadTexture(renderer, assetPath);
             if (texture == IntPtr.Zero)
             {

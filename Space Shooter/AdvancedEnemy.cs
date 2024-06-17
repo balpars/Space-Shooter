@@ -84,7 +84,7 @@ namespace Space_Shooter
         {
             
             hitCount++;
-            if (hitCount >= 2)
+            if (hitCount >= 3)
             {
                 game.IncreaseScore(250);
                 base.OnHit();

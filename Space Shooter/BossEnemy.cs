@@ -29,7 +29,7 @@ namespace Space_Shooter
                 Console.WriteLine($"Unable to load texture {assetPath}! SDL_Error: {SDL.SDL_GetError()}");
             }
             this.game = game;
-            this.health = 15; // Boss health set to 10
+            this.health = 30; // Boss health set to 10
             this.movePhase = 0;
             this.phaseStartTime = SDL.SDL_GetTicks();
 
