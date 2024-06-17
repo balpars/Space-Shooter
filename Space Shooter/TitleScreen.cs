@@ -38,5 +38,4 @@ namespace Space_Shooter
             };
         }
     }
-
 }

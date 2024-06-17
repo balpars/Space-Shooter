@@ -37,7 +37,7 @@ namespace Space_Shooter
         public BasicProjectile(int x, int y, int size, bool isUpwards, GameObject owner)
             : base(x, y, size, isUpwards, owner)
         {
-            assetPath = "Assets/Projectiles/projectile.png"; // Path to your projectile image
+            assetPath = "Assets/Projectiles/projectile.png"; 
         }
     }
 
@@ -46,7 +46,7 @@ namespace Space_Shooter
         public AdvancedProjectile(int x, int y, int size, bool isUpwards, GameObject owner)
             : base(x, y, size, isUpwards, owner)
         {
-            assetPath = "Assets/Projectiles/advanced_projectile.png"; // Path to your advanced projectile image
+            assetPath = "Assets/Projectiles/advanced_projectile.png"; 
         }
     }
 
@@ -55,7 +55,21 @@ namespace Space_Shooter
         public BossProjectile(int x, int y, int size, bool isUpwards, GameObject owner)
             : base(x, y, size, isUpwards, owner)
         {
-            assetPath = "Assets/Bullets/boss_bullet.png"; // Path to your boss projectile image
+            assetPath = "Assets/Bullets/boss_bullet.png"; 
+        }
+
+        public SDL.SDL_Rect GetCollisionRect()
+        {
+            // Return a smaller rectangle for collision detection
+            int collisionWidth = rect.w / 3;
+            int collisionHeight = rect.h / 2;
+            return new SDL.SDL_Rect
+            {
+                x = rect.x + (rect.w - collisionWidth) / 2,
+                y = rect.y + (rect.h - collisionHeight) / 2,
+                w = collisionWidth,
+                h = collisionHeight
+            };
         }
     }
 }

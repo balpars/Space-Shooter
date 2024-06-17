@@ -1,7 +1,4 @@
-﻿// File: BulletBoost.cs
-
-using SDL2;
-using System;
+﻿using SDL2;
 
 namespace Space_Shooter
 {

@@ -8,12 +8,11 @@ namespace Space_Shooter
 
         public Heart(int x, int y, int size) : base(x, y, size, size)
         {
-            assetPath = "Assets/Heart/heart.png"; // Path to your heart image
+            assetPath = "Assets/Heart/heart.png";
         }
 
         public override void Update()
         {
-            // Hearts don't move or update in this simple example
         }
 
         public string? GetAssetPath()

@@ -1,6 +1,4 @@
-﻿// File: GameOver.cs
-
-using SDL2;
+﻿using SDL2;
 using System;
 
 namespace Space_Shooter

@@ -1,6 +1,4 @@
-﻿// File: CollisionManager.cs
-
-using SDL2;
+﻿using SDL2;
 using System;
 using System.Collections.Generic;
 
@@ -21,12 +19,10 @@ namespace Space_Shooter
                     var enemyRect = enemy.GetRect();
 
                     // Skip collision check if the projectile owner is an enemy and the target is also an enemy
-                    //if (projectile.Owner is Enemy && projectile.Owner != enemy && IsColliding(projectileRect, enemyRect))
                     if (projectile.Owner is Enemy && IsColliding(projectileRect, enemyRect))
                     {
                         continue;
                     }
-
 
                     // Player bullet to Enemy
                     if (projectile.Owner != enemy && IsColliding(projectileRect, enemy.GetCollisionRect()))
@@ -38,7 +34,6 @@ namespace Space_Shooter
                         if (!enemy.IsHit())
                         {
                             enemy.OnHit();
-                            //game.IncreaseScore(enemy.GetPoints());
                         }
                         game.PlayCollisionSound();
                         break;
@@ -55,13 +50,9 @@ namespace Space_Shooter
                     game.PlayCollisionSound();
                     if (player.Health > 0)
                     {
-                        player.UpdateHealth(-1); // Reduce health by 1
+                        player.UpdateHealth(-1);
                     }
 
-                    // else
-                    // {
-                    //    game.GameOver();
-                    // }
                 }
             }
 
@@ -77,22 +68,17 @@ namespace Space_Shooter
                     if (!enemy.IsHit())
                     {
                         enemy.OnHit();
-                        //game.IncreaseScore(enemy.GetPoints());
                     }
                     game.PlayCollisionSound();
                     if (player.Health > 0)
                     {
-                        player.UpdateHealth(-1); // Reduce health by 1
+                        player.UpdateHealth(-1);
                     }
-                    //else
-                    //{
-                    //    game.GameOver();
-                    //}
+
                 }
             }
         }
 
-        //public static void CheckRockCollisions(List<Rock> rocks, Player player, Game game)
         public static void CheckRockCollisions(List<Rock> rocks, List<Projectile> projectiles,Player player, Game game)
         {
             for (int i = rocks.Count - 1; i >= 0; i--)
@@ -110,12 +96,8 @@ namespace Space_Shooter
                     game.PlayCollisionSound();
                     if (player.Health > 0)
                     {
-                        player.UpdateHealth(-1); // Reduce health by 1
+                        player.UpdateHealth(-1);
                     }
-                    //else
-                    //{
-                    //    game.GameOver();
-                    //}
                 }
 
 
@@ -123,8 +105,17 @@ namespace Space_Shooter
                 for (int j = projectiles.Count - 1; j >= 0; j--)
                 {
                     var projectile = projectiles[j];
-                    var projectileRect = projectile.GetRect();
-                    
+                    SDL.SDL_Rect projectileRect;
+
+                    if (projectile is BossProjectile bossProjectile)
+                    {
+                        projectileRect = bossProjectile.GetCollisionRect();
+                    }
+                    else
+                    {
+                        projectileRect = projectile.GetRect();
+                    }
+
                     if (IsColliding(projectileRect, rockRect))
                     {
                         int effectX = projectileRect.x - projectileRect.w / 2;
@@ -134,9 +125,8 @@ namespace Space_Shooter
                         game.PlayCollisionSound();
                         break;
                     }
-
-
                 }
+
             }
         }
 
@@ -150,8 +140,8 @@ namespace Space_Shooter
                 if (IsColliding(healthBoostRect, player.GetCollisionRect()))
                 {
                     healthBoosts.RemoveAt(i);   
-                    game.PlayHealthBoostSound(); // Play health boost sound
-                    player.UpdateHealth(1); // Increase health by 1
+                    game.PlayHealthBoostSound();
+                    player.UpdateHealth(1);
                 }
             }
         }
@@ -166,8 +156,8 @@ namespace Space_Shooter
                 if (IsColliding(bulletBoostRect, player.GetCollisionRect()))
                 {
                     bulletBoosts.RemoveAt(i);
-                    player.ActivateTripleShot(10000); // Activate triple shot for 10 seconds
-                    player.PlayPowerUpSound(); // Play power-up sound
+                    player.ActivateTripleShot(10000); 
+                    player.PlayPowerUpSound(); 
                 }
             }
         }

@@ -29,11 +29,6 @@ namespace Space_Shooter
             SDL.SDL_RenderClear(renderer);
         }
 
-        public void DrawBackground(Background bg)
-        {
-            bg.Render(renderer);
-        }
-
         public void Draw(GameObject obj)
         {
             if (obj is Enemy enemy && enemy.GetAssetPath() != null)
@@ -49,15 +44,12 @@ namespace Space_Shooter
                 SDL.SDL_Rect srcRect = new SDL.SDL_Rect { x = 0, y = 0, w = 100, h = 100 };
                 SDL.SDL_Rect destRect;
 
-                // Check if the current asset is the protected player asset
                 if (player.GetAssetPath().Contains("protected_player.png"))
                 {
-                    // Render the protected player asset at 60x60 size
                     destRect = new SDL.SDL_Rect { x = player.PositionX + 20, y = player.PositionY, w = 60, h = 60 };
                 }
                 else
                 {
-                    // Render other player assets at their original size
                     destRect = new SDL.SDL_Rect { x = player.PositionX, y = player.PositionY, w = 100, h = 100 };
                 }
 
@@ -68,7 +60,6 @@ namespace Space_Shooter
                 IntPtr texture = TextureManager.LoadTexture(projectile.GetAssetPath(), renderer);
                 SDL.SDL_Rect srcRect = new SDL.SDL_Rect { x = 0, y = 0, w = 100, h = 100 };
                 SDL.SDL_Rect destRect = obj.GetRect();
-                // Ensure the projectile texture is scaled correctly
                 SDL.SDL_RenderCopy(renderer, texture, ref srcRect, ref destRect);
             }
             else if (obj is Heart heart && heart.GetAssetPath() != null)
@@ -76,7 +67,6 @@ namespace Space_Shooter
                 IntPtr texture = TextureManager.LoadTexture(heart.GetAssetPath(), renderer);
                 SDL.SDL_Rect srcRect = new SDL.SDL_Rect { x = 0, y = 0, w = 100, h = 100 };
                 SDL.SDL_Rect destRect = obj.GetRect();
-                // Ensure the heart texture is scaled correctly
                 SDL.SDL_RenderCopy(renderer, texture, ref srcRect, ref destRect);
             }
             else // If there are no assets, draw red rectangles
@@ -96,40 +86,5 @@ namespace Space_Shooter
         {
             SDL.SDL_DestroyRenderer(renderer);
         }
-
-        public IntPtr GetRenderer()
-        {
-            return this.renderer;
-        }
-
-        public static void RenderText(IntPtr renderer, IntPtr font, string text, int x, int y)
-        {
-            SDL.SDL_Color color = new SDL.SDL_Color { r = 255, g = 255, b = 255, a = 255 };
-            IntPtr surface = SDL_ttf.TTF_RenderText_Solid(font, text, color);
-            IntPtr texture = SDL.SDL_CreateTextureFromSurface(renderer, surface);
-
-            SDL.SDL_QueryTexture(texture, out _, out _, out int width, out int height);
-            SDL.SDL_Rect dstRect = new SDL.SDL_Rect { x = x, y = y, w = width, h = height };
-
-            SDL.SDL_RenderCopy(renderer, texture, IntPtr.Zero, ref dstRect);
-
-            SDL.SDL_FreeSurface(surface);
-            SDL.SDL_DestroyTexture(texture);
-        }
-
-        public static void RenderTextLetterByLetter(IntPtr renderer, IntPtr font, string text, int x, int y, ref string currentText, ref int currentIndex, int delay, ref uint lastTime)
-        {
-            uint currentTime = SDL.SDL_GetTicks();
-            if (currentTime - lastTime >= delay && currentIndex < text.Length)
-            {
-                currentText += text[currentIndex];
-                currentIndex++;
-                lastTime = currentTime;
-            }
-
-            RenderText(renderer, font, currentText, x, y);
-        }
-
-
     }
 }

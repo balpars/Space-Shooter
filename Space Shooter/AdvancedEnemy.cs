@@ -1,8 +1,5 @@
-﻿// File: AdvancedEnemy.cs
+﻿using SDL2;
 
-using SDL2;
-using System;
-using System.Collections.Generic;
 
 namespace Space_Shooter
 {
@@ -17,7 +14,7 @@ namespace Space_Shooter
         private int hitCount;
 
         public AdvancedEnemy(int x, int y, int size, IntPtr renderer, int speedX, int speedY, Game game, Direction shootDirection)
-            : base(x, y, size, renderer, 250, speedX, speedY, game) // Points set to 250
+            : base(x, y, size, renderer, 250, speedX, speedY, game)
         {
             assetPath = "Assets/Enemy/advanced_enemy.png";
             texture = SDL_image.IMG_LoadTexture(renderer, assetPath);
@@ -28,7 +25,7 @@ namespace Space_Shooter
             this.shootDirection = shootDirection;
             this.stayStartTime = SDL.SDL_GetTicks();
             this.isStaying = true;
-            this.moveDirection = speedX > 0 ? 1 : -1; // Set initial direction based on speedX
+            this.moveDirection = speedX > 0 ? 1 : -1;
             this.hitCount = 0; 
         }
 
@@ -64,7 +61,7 @@ namespace Space_Shooter
         {
             int projectileX = rect.x + rect.w / 2;
             int projectileY = rect.y + rect.h;
-            var projectile = new AdvancedProjectile(projectileX, projectileY, 20, false, this); // Use advanced_projectile.png for all advanced enemies
+            var projectile = new AdvancedProjectile(projectileX, projectileY, 20, false, this);
             switch (shootDirection)
             {
                 case Direction.LeftDiagonal:

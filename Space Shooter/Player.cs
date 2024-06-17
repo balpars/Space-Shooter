@@ -1,7 +1,5 @@
-﻿// File: Player.cs
+﻿using SDL2;
 
-using SDL2;
-using System.Collections.Generic;
 
 namespace Space_Shooter
 {
@@ -20,13 +18,13 @@ namespace Space_Shooter
         private Game game;
         private float velocityX;
         private float velocityY;
-        private float acceleration = 0.5f; // Acceleration rate
-        private float maxSpeed = 5f; // Maximum speed
-        private float deceleration = 0.95f; // Deceleration rate
+        private float acceleration = 0.5f;
+        private float maxSpeed = 5f;
+        private float deceleration = 0.95f; 
         public List<Heart> hearts;
         private IntPtr shootSound;
-        private IntPtr powerUpSound; // Sound for power-up collision
-        private IntPtr healthBoostSound; // Sound for health boost collision
+        private IntPtr powerUpSound; 
+        private IntPtr healthBoostSound; 
         private Dictionary<int, IntPtr> textures; // Store textures based on health
         private IntPtr texture; // Current texture
         private bool tripleShotActive;
@@ -41,7 +39,7 @@ namespace Space_Shooter
                 "Assets/Player/player_2.png",
                 "Assets/Player/player_3.png",
                 "Assets/Player/player_4.png",
-                "Assets/Player/protected_player.png" // Added protected player asset
+                "Assets/Player/protected_player.png"
             };
             shieldActive = false;
             this.PositionX = (w - 100) / 2;
@@ -56,12 +54,12 @@ namespace Space_Shooter
             hearts = new List<Heart>();
             for (int i = 0; i < health; i++)
             {
-                hearts.Add(new Heart((screenWidth / 2) - (health * 15) + (i * 30), 20, 70)); // Adjust the position and size as needed
+                hearts.Add(new Heart((screenWidth / 2) - (health * 15) + (i * 30), 20, 70)); // Heart positions
             }
 
             shootSound = SoundManager.LoadSound("Assets/Sounds/shoot.wav");
-            powerUpSound = SoundManager.LoadSound("Assets/Sounds/power_up.wav"); // Load power-up sound
-            healthBoostSound = SoundManager.LoadSound("Assets/Sounds/health_boost.wav"); // Load health boost sound
+            powerUpSound = SoundManager.LoadSound("Assets/Sounds/power_up.wav");
+            healthBoostSound = SoundManager.LoadSound("Assets/Sounds/health_boost.wav"); 
 
             // Load textures
             textures = new Dictionary<int, IntPtr>();
@@ -74,7 +72,7 @@ namespace Space_Shooter
             // Set initial texture
             SetTexture(renderer, GetTextureIndexByHealth());
 
-            tripleShotActive = false; // Initialize triple shot mode as inactive
+            tripleShotActive = false; 
         }
 
         public void ClearProjectiles()
@@ -88,13 +86,9 @@ namespace Space_Shooter
             UpdateHearts();
             if (Health <= 0)
             {
-                game.GameOver(); // Trigger game over if health is zero
+                game.GameOver(); 
             }
 
-            else
-            {
-                //CollisionManager.CheckEnemyCollisions(projectiles, enemies, this, game);
-            }
 
             // Check if triple shot duration has ended
             if (tripleShotActive && SDL.SDL_GetTicks() > tripleShotEndTime)
@@ -107,9 +101,9 @@ namespace Space_Shooter
             {
                 shieldActive = false;
                 SetTexture(game.renderer.RendererHandle, GetTextureIndexByHealth()); // Restore original texture based on health
+
             }
 
-            // Apply deceleration
             velocityX *= deceleration;
             velocityY *= deceleration;
 
@@ -136,18 +130,7 @@ namespace Space_Shooter
             SetTexture(game.renderer.RendererHandle, 4); // Set to protected player asset
         }
 
-        public void OnHit()
-        {
-            if (!shieldActive)
-            {
-                // Reduce health or handle player hit logic
-                UpdateHealth(-1);
-                //if (Health <= 0)
-                //{
-                //    game.GameOver();
-                //}
-            }
-        }
+
 
         private int GetTextureIndexByHealth()
         {
@@ -155,27 +138,23 @@ namespace Space_Shooter
             {
                 return 4; // protected_player.png
             }
-            return Health switch
-            {
-                5 => 3, // player_4.png
-                4 => 2, // player_3.png
-                3 => 1, // player_2.png
-                _ => 0  // player_1.png for 2 and 1 health
-            };
-        }
 
-        public void SetPlayerAsset(int assetIndex)
-        {
-            if (textures.ContainsKey(assetIndex))
+            if (Health == 5)
             {
-                SDL.SDL_DestroyTexture(texture); // Destroy the previous texture
-                texture = textures[assetIndex];
+                return 3; // player_4.png
             }
-        }
-
-        public int GetScore()
-        {
-            return game.GetScore();
+            else if (Health == 4)
+            {
+                return 2; // player_3.png
+            }
+            else if (Health == 3)
+            {
+                return 1; // player_2.png
+            }
+            else
+            {
+                return 0; // player_1.png for 2 and 1 health
+            }
         }
 
         public void HandleInput(byte[] keys, IntPtr gameController)
@@ -270,9 +249,7 @@ namespace Space_Shooter
                 }
 
                 lastShootTime = currentTime;
-                SoundManager.PlaySound(shootSound); // Play the shoot sound
-
-                //Console.WriteLine("Projectile Owner:" + centerProjectile.Owner);
+                SoundManager.PlaySound(shootSound); 
             }
 
         }
@@ -294,7 +271,7 @@ namespace Space_Shooter
             hearts.Clear();
             for (int i = 0; i < Health; i++)
             {
-                hearts.Add(new Heart((screenWidth / 2) - (Health * 15) + (i * 30), 20, 70)); // Adjust the position and size as needed
+                hearts.Add(new Heart((screenWidth / 2) - (Health * 15) + (i * 30), 20, 70));
             }
         }
 
@@ -342,27 +319,33 @@ namespace Space_Shooter
         {
             if (textures.ContainsKey(assetIndex))
             {
-                SDL.SDL_DestroyTexture(texture); // Destroy the previous texture
                 texture = textures[assetIndex];
             }
         }
 
         public void UpdateHealth(int amount)
         {
-            if (!shieldActive)
+
+            if (shieldActive && amount > 0)
             {
                 Health += amount;
-                if (Health > 5)
-                {
-                    Health = 5; // Cap health at 5
-                }
-                else if (Health < 0)
-                {
-                    Health = 0;
-                }
-                SetTexture(game.renderer.RendererHandle, GetTextureIndexByHealth()); // Update the texture based on the new health or shield status
-                UpdateHearts(); // Update hearts display
             }
+            else if (!shieldActive)
+            {
+                Health += amount;
+            }
+
+            if (Health > 5)
+            {
+                Health = 5; // Cap health at 5
+            }
+            else if (Health < 0)
+            {
+                Health = 0;
+            }
+            SetTexture(game.renderer.RendererHandle, GetTextureIndexByHealth()); // Update the texture based on the new health or shield status
+            UpdateHearts();
+
         }
 
         public void ActivateTripleShot(uint duration)
@@ -376,15 +359,6 @@ namespace Space_Shooter
             SoundManager.PlaySound(powerUpSound);
         }
 
-        public void PlayHealthBoostSound()
-        {
-            SoundManager.PlaySound(healthBoostSound);
-        }
-
-        public GameObject getInstance()
-        {
-            return this;
-        }
 
     }
 }

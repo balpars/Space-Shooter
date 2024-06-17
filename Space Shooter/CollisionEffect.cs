@@ -26,10 +26,7 @@ namespace Space_Shooter
             this.destRect = new SDL.SDL_Rect { x = x, y = y, w = 35, h = 35 };
         }
 
-        public override void Update()
-        {
-            // No specific update logic for collision effects in this case
-        }
+
 
         public bool IsActive()
         {

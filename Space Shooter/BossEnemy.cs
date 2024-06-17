@@ -1,6 +1,4 @@
-﻿// File: BossEnemy.cs
-
-using SDL2;
+﻿using SDL2;
 using System;
 using System.Collections.Generic;
 
@@ -10,23 +8,19 @@ namespace Space_Shooter
     {
         private int health;
         private Game game;
-        private int movePhase; // Track which phase of movement the boss is in
+        private int movePhase;
         private uint phaseStartTime;
         private List<SDL.SDL_Point> positions;
         private SDL.SDL_Point currentPosition;
         private SDL.SDL_Point targetPosition;
-        private int shootInterval = 1500; // Shoot every second
+        private int shootInterval = 1000; // Shoot every second
         private uint lastShootTime;
-        private Direction shootDirection;
-        private uint stayDuration = 20000; // 20 seconds in milliseconds
-        private uint stayStartTime;
-        private bool isStaying;
-        private int moveDirection;
-        private int moveSpeed = 2; // Speed of lateral movement
-        private int hitCount;
+        private uint moveOutTime; // Time when the boss moves out
+        private bool isMovingOut; // Flag to indicate if the boss is moving out
+
 
         public BossEnemy(int x, int y, int size, IntPtr renderer, Game game)
-            : base(x, y, size, renderer, 0, 0, 0, game) // Points set to 0 since boss isn't defeated in one hit
+            : base(x, y, size, renderer, 0, 0, 0, game)
         {
             assetPath = "Assets/Enemy/boss_enemy.png";
             texture = SDL_image.IMG_LoadTexture(renderer, assetPath);
@@ -35,12 +29,10 @@ namespace Space_Shooter
                 Console.WriteLine($"Unable to load texture {assetPath}! SDL_Error: {SDL.SDL_GetError()}");
             }
             this.game = game;
-            this.health = 10; // Boss health set to 10
+            this.health = 15; // Boss health set to 10
             this.movePhase = 0;
             this.phaseStartTime = SDL.SDL_GetTicks();
-            this.shootDirection = Direction.Straight; // Initialize shoot direction
 
-            // Define the positions for the boss to move to
             positions = new List<SDL.SDL_Point>
             {
                 new SDL.SDL_Point { x = game.windowWidth / 2 - size / 2, y = 0 }, // Top
@@ -52,13 +44,14 @@ namespace Space_Shooter
             this.currentPosition = new SDL.SDL_Point { x = x, y = y };
             this.targetPosition = positions[movePhase];
             this.lastShootTime = SDL.SDL_GetTicks();
+            this.isMovingOut = false;
+            this.moveOutTime = 0;
         }
 
         public override void Update()
         {
             uint currentTime = SDL.SDL_GetTicks();
 
-            // Move towards the target position
             MoveTowardsTarget();
 
             // Change phase every 10 seconds
@@ -67,8 +60,13 @@ namespace Space_Shooter
                 movePhase++;
                 if (movePhase >= positions.Count)
                 {
-                    // Move out of screen after completing all phases
-                    targetPosition = new SDL.SDL_Point { x = currentPosition.x, y = game.windowHeight };
+                    if (!isMovingOut)
+                    {
+                        // Move out of screen after completing all phases
+                        targetPosition = new SDL.SDL_Point { x = currentPosition.x, y = game.windowHeight };
+                        isMovingOut = true;
+                        moveOutTime = currentTime; // Record the time when boss starts moving out
+                    }
                 }
                 else
                 {
@@ -84,6 +82,16 @@ namespace Space_Shooter
                 lastShootTime = currentTime;
             }
 
+            // Call GameOver() 3 seconds after the boss moves out of the screen
+            if (isMovingOut) 
+            {
+                currentTime = SDL.SDL_GetTicks();
+                if (currentTime > moveOutTime + 3000) {
+                    game.GameOver();
+                    isMovingOut = false;
+                }
+            }
+
             base.Update();
         }
 
@@ -91,15 +99,15 @@ namespace Space_Shooter
         {
             int speed = 2;
             if (currentPosition.x < targetPosition.x)
-                    {
+            {
                 currentPosition.x += speed;
                 if (currentPosition.x > targetPosition.x) currentPosition.x = targetPosition.x;
-                    }
+            }
             else if (currentPosition.x > targetPosition.x)
             {
                 currentPosition.x -= speed;
                 if (currentPosition.x < targetPosition.x) currentPosition.x = targetPosition.x;
-                }
+            }
 
             if (currentPosition.y < targetPosition.y)
             {
@@ -125,7 +133,7 @@ namespace Space_Shooter
             float speed = 10;
 
             int bulletX = rect.x + rect.w / 2 - 10; // Center of the boss
-            int bulletY = rect.y + rect.h;
+            int bulletY = rect.y + rect.h - 70;
 
             var bossBullet = new BossProjectile(bulletX, bulletY, 40, false, this)
             {
@@ -146,8 +154,6 @@ namespace Space_Shooter
                 game.GameFinished();
             }
         }
-
-      
 
         public new void Cleanup()
         {

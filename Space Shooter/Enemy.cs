@@ -1,6 +1,4 @@
-﻿// File: Enemy.cs
-
-using SDL2;
+﻿using SDL2;
 using System;
 
 namespace Space_Shooter
@@ -33,7 +31,7 @@ namespace Space_Shooter
             this.points = points;
             this.game = game;
             isHit = false;
-            this.hitLifetime = 500; // Add appropriate value
+            this.hitLifetime = 500;
             this.hitLifetimeRemaining = hitLifetime;
             isFlashing = false;
             flashCount = 0;
@@ -41,10 +39,7 @@ namespace Space_Shooter
             flashInterval = 500;
             isVisible = true;
 
-            //if (SDL_image.IMG_Init(SDL_image.IMG_InitFlags.IMG_INIT_PNG) == 0)
-            //{
-            //    Console.WriteLine($"Failed to initialize SDL_image! SDL_image Error: {SDL.SDL_GetError()}");
-            //}
+
 
             assetPath = "Assets/Enemy/enemy.png";
             texture = SDL_image.IMG_LoadTexture(renderer, assetPath);
@@ -92,8 +87,6 @@ namespace Space_Shooter
 
                 if (hitLifetimeRemaining <= 0)
                 {
-                    //rect.x = -1000;
-       
                     this.Cleanup();
                 }
             }
@@ -129,17 +122,6 @@ namespace Space_Shooter
         public bool IsHit()
         {
             return isHit;
-        }
-
-
-        //public bool IsExpired()
-        //{
-        //    return !isHit && rect.x == -1000;
-        //}
-
-        public int GetPoints()
-        {
-            return points;
         }
 
         public string? GetAssetPath()

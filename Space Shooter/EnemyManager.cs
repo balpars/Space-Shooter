@@ -32,12 +32,11 @@ namespace Space_Shooter
         private uint lastBulletBoostSpawnTime;
         private uint lastShieldBoostSpawnTime;
         private int spawnInterval = 2000;
-        private int advancedEnemySpawnInterval = 7000; // 20 seconds interval for advanced enemies
+        private int advancedEnemySpawnInterval = 7000; // 7 seconds interval for advanced enemies
         private int rockSpawnInterval = 1500;
-        private int healthBoostSpawnInterval = 10000; // 10 seconds interval
+        private int healthBoostSpawnInterval = 1000; // 10 seconds interval
         private int bulletBoostSpawnInterval = 15000; // 15 seconds interval
-        private int shieldBoostSpawnInterval = 20000; // 20 seconds interval
-
+        private int shieldBoostSpawnInterval = 2000; // 20 seconds interval
         private bool isFastMode;
         private bool bossSpawned = false;
 
@@ -145,7 +144,6 @@ namespace Space_Shooter
                 {
                     SpawnBoss();
                     bossSpawned = true;
-                    // Remove all existing basic and advanced enemies
                     enemies.RemoveAll(e => e is BasicEnemy || e is AdvancedEnemy);
                 }
             }
@@ -186,7 +184,7 @@ namespace Space_Shooter
                 lastRockSpawnTime = currentTime;
             }
 
-            if (currentTime > lastHealthBoostSpawnTime + healthBoostSpawnInterval && player.Health <= 3)
+            if (currentTime > lastHealthBoostSpawnTime + healthBoostSpawnInterval && player.Health <= 4)
             {
                 CreateHealthBoost();
                 lastHealthBoostSpawnTime = currentTime;
@@ -251,16 +249,15 @@ namespace Space_Shooter
 
         private void SpawnAdvancedEnemies()
         {
-            int spacing = screenWidth / 3; // Change to divide screen width into three parts
-            for (int i = 0; i < 2; i++) // Loop for only two enemies
+            int spacing = screenWidth / 3; 
+            for (int i = 0; i < 2; i++)
             {
-                int objectX = spacing * (i + 1) - advancedObjectSize / 2; // Adjust for larger size and new spacing
+                int objectX = spacing * (i + 1) - advancedObjectSize / 2; 
                 int objectY = 0;
                 Direction direction = i switch
                 {
                     0 => Direction.RightDiagonal,
                     1 => Direction.LeftDiagonal,
-                    //_ => Direction.Straight
                 };
                 int moveDirection = i == 0 ? 1 : -1; // First enemy moves right, second moves left
                 var enemy = new AdvancedEnemy(objectX, objectY, advancedObjectSize, renderer, moveDirection * 2, 0, game, direction); // Set initial horizontal speed
@@ -274,7 +271,7 @@ namespace Space_Shooter
         {
             int objectX = screenWidth / 2 - 100; // Center the boss horizontally
             int objectY = -200; // Start the boss off-screen at the top
-            var boss = new BossEnemy(objectX, objectY, 200, renderer, game); // Create the boss enemy
+            var boss = new BossEnemy(objectX, objectY, 200, renderer, game);
             enemies.Add(boss);
         }
 
@@ -287,7 +284,7 @@ namespace Space_Shooter
             rocks.Add(new Rock(rockX, rockY, objectSize, renderer, rockSpeed));
         }
 
-        private void CreateHealthBoost()
+        public void CreateHealthBoost()
         {
             int boostX = random.Next(0, screenWidth - objectSize);
             int boostY = -objectSize;

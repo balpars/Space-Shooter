@@ -22,14 +22,5 @@ namespace Space_Shooter
             }
             return textureMap[fileName];
         }
-
-        public static void Clear()
-        {
-            foreach (var texture in textureMap.Values)
-            {
-                SDL.SDL_DestroyTexture(texture);
-            }
-            textureMap.Clear();
-        }
     }
 }

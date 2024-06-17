@@ -1,5 +1,4 @@
-﻿// File: ShieldBoost.cs
-
+﻿
 using SDL2;
 using System;
 

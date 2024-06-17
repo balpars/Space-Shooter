@@ -1,6 +1,4 @@
-﻿// File: HealthBoost.cs
-
-using SDL2;
+﻿using SDL2;
 using System;
 
 namespace Space_Shooter
@@ -23,7 +21,7 @@ namespace Space_Shooter
                 Console.WriteLine($"Failed to initialize SDL_image! SDL_image Error: {SDL.SDL_GetError()}");
             }
 
-            string assetPath = "Assets/HealthBoost/health_boost.png"; // Path to your health boost image
+            string assetPath = "Assets/HealthBoost/health_boost.png";
             texture = SDL_image.IMG_LoadTexture(renderer, assetPath);
             if (texture == IntPtr.Zero)
             {
@@ -42,11 +40,6 @@ namespace Space_Shooter
         {
             SDL.SDL_Point center = new SDL.SDL_Point { x = rect.w / 2, y = rect.h / 2 }; // Center of the texture
             SDL.SDL_RenderCopyEx(renderer, texture, IntPtr.Zero, ref rect, angle, ref center, SDL.SDL_RendererFlip.SDL_FLIP_NONE);
-        }
-
-        public void Cleanup()
-        {
-            SDL.SDL_DestroyTexture(texture);
         }
     }
 }
